@@ -3,11 +3,18 @@ const bodyParser = require('body-parser');
 
 const mongodb = require('mongodb');
 const MONGO_URL = 'mongodb://kaushik:kaushik123@ds235609.mlab.com:35609/thought-jar-test';
+const ObjectId = require('mongodb').ObjectId;
+
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client('665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.apps.googleusercontent.com');
+
+const async = require("async");
+const Promise = require('promise');
 
 const app = express();
 
 var db;
-
+var clientID;
 // support parsing of application/json type post data
 app.use(bodyParser.json());
 
@@ -43,10 +50,8 @@ app.post('/loginUser', function (req, res) {
 });
 
 app.post('/createSurvey', function (req, res) {
-
+    clientID = req.body.client;
     var surveyCollection = db.collection('surveys');
-
-    console.log(typeof req.body);
 
     const numberQuestions = Object.keys(req.body).length;
     var questionsList = [];
@@ -72,7 +77,14 @@ app.post('/createSurvey', function (req, res) {
       if(err) {
         throw err;
       } else {
-        res.send("success");
+        console.log(result);
+        var clientCollection = db.collection('clients');
+
+        clientCollection.update({ "_id" : clientID }, { $push: { "surveysOwned": result } }, function (err, result) {
+          console.log("success2");
+          res.send("success");
+        });
+
       }
 
     });
@@ -82,6 +94,27 @@ app.post('/createSurvey', function (req, res) {
 app.get('/respond', function (req, res) {
   //token passed through url
   //access token with req.query.uTx
+});
+
+app.post('/authenticate', function (req, res) {
+
+  console.log(req.body);
+
+  const ticket = client.verifyIdToken({
+      idToken: req.body.id_token,
+      audience: '665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.apps.googleusercontent.com',
+      // Or, if multiple clients access the backend:
+      //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+
+    /*const payload = ticket.getPayload();
+    const userEmail = payload['email'];
+    console.log(userEmail); */
+    // If request specified a G Suite domain:
+    //const domain = payload['hd'];
+  }).then(function (newtx) {
+    console.log(newtx);
+  });
+
 });
 
 app.listen(5000, () => console.log('Listening on port 5000 ...'));
