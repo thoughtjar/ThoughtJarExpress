@@ -1,0 +1,23 @@
+{
+  "name": "ThoughtJarExpress",
+  "version": "1.0.0",
+  "description": "backend for thoughtjar",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xeliot/ThoughtJarExpress.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xeliot/ThoughtJarExpress/issues"
+  },
+  "homepage": "https://github.com/xeliot/ThoughtJarExpress#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
+}
