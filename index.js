@@ -14,6 +14,12 @@ app.use(bodyParser.json());
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
 
   if(err) {
@@ -40,26 +46,26 @@ app.post('/createSurvey', function (req, res) {
 
     var surveyCollection = db.collection('surveys');
 
-    let surveyData = [
-    {
-      decade: '1970s',
-      artist: 'Debby Boone',
-      song: 'You Light Up My Life',
-      weeksAtOne: 10
-    },
-    {
-      decade: '1980s',
-      artist: 'Olivia Newton-John',
-      song: 'Physical',
-      weeksAtOne: 10
-    },
-    {
-      decade: '1990s',
-      artist: 'Mariah Carey',
-      song: 'One Sweet Day',
-      weeksAtOne: 16
+    console.log(typeof req.body);
+
+    const numberQuestions = Object.keys(req.body).length;
+    var questionsList = [];
+    for(var key in req.body) {
+      console.log(key);
+
+      let surveyQuestionData = {
+        questionType: req.body[key][0],
+        questionField: req.body[key][1],
+        answerOptions: req.body[key][2]
+      };
+      questionsList = questionsList.concat(surveyQuestionData);
     }
-  ];
+    console.log(questionsList);
+
+    const surveyData = {
+      "numQuestions": numberQuestions,
+      "questionList": questionsList
+    };
 
     surveyCollection.insert(surveyData, function(err, result) {
 
