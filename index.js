@@ -104,8 +104,8 @@ app.post('/authenticate', function (req, res) {
 
   }).then(function (newTx) {
     console.log(newTx);
-    console.log(newTx['email']);
-    var userEmail = newTx['email'];
+    console.log(newTx['payload']['email']);
+    var userEmail = newTx['payload']['email'];
     //search db and see if email exists
     //if exists, send back cookie
     //if does not exist, create new document with user and send back cookie
