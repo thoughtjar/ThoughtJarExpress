@@ -113,14 +113,10 @@ app.post('/authenticate', function (req, res) {
 
         if( users.find({email: userEmail}).limit(1).count() > 0) {
           //send back cookie
-          
+
         } else {
           //create new document with user and send back cookie
         }
-
-    }
-
-
 
   });
 
