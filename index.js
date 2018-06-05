@@ -41,14 +41,6 @@ app.get('/', (req, res) => {
   res.send('Hello World');
 });
 
-app.post('/createUser', function (req, res) {
-
-});
-
-app.post('/loginUser', function (req, res) {
-  //pass a token or cookie back
-});
-
 app.post('/createSurvey', function (req, res) {
     clientID = req.body.client;
     var surveyCollection = db.collection('surveys');
@@ -103,16 +95,33 @@ app.post('/authenticate', function (req, res) {
   const ticket = client.verifyIdToken({
       idToken: req.body.id_token,
       audience: '665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.apps.googleusercontent.com',
-      // Or, if multiple clients access the backend:
-      //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
 
     /*const payload = ticket.getPayload();
     const userEmail = payload['email'];
     console.log(userEmail); */
     // If request specified a G Suite domain:
     //const domain = payload['hd'];
-  }).then(function (newtx) {
-    console.log(newtx);
+
+  }).then(function (newTx) {
+    console.log(newTx);
+    console.log(newTx['email']);
+    var userEmail = newTx['email'];
+    res.send('token123');
+    //search db and see if email exists
+    //if exists, send back cookie
+    //if does not exist, create new document with user and send back cookie
+
+        if( users.find({email: userEmail}).limit(1).count() > 0) {
+          //send back cookie
+          
+        } else {
+          //create new document with user and send back cookie
+        }
+
+    }
+
+
+
   });
 
 });
