@@ -104,23 +104,21 @@ app.post('/authenticate', function (req, res) {
 
   }).then(function (newTx) {
     console.log(newTx);
-    console.log(newTx['payload']['email']);
-    var userEmail = newTx['payload']['email'];
+    console.log('email: ' + newTx['payload']['email']);
+  //  var userEmail = newTx['payload']['email'];
     //search db and see if email exists
     //if exists, send back cookie
     //if does not exist, create new document with user and send back cookie
     var users = db.collection('users');
-    console.log(users.find({email: userEmail}).limit(1).count() > 0);
-
-        if( users.find({email: userEmail}).limit(1).count() > 0) {
-          //send back cookie
-          console.log('success123');
-          res.send('success123');
+    users.find({email: newTx['payload']['email']}).toArray(function (err, result) {
+        if(result.length > 0) {
+          console.log('user exists');
+          res.send('exists123');
         } else {
-          console.log('fail123');
-          //create new document with user and send back cookie
-          res.send('fail123');
+          console.log('user does not exist');
+          res.send('notexist123');
         }
+    });
 
   });
 
