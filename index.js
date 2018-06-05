@@ -109,6 +109,8 @@ app.post('/authenticate', function (req, res) {
     //search db and see if email exists
     //if exists, send back cookie
     //if does not exist, create new document with user and send back cookie
+    console.log(users.find({email: userEmail}).limit(1).count() > 0);
+    
     var users = db.collection('users');
         if( users.find({email: userEmail}).limit(1).count() > 0) {
           //send back cookie
