@@ -106,16 +106,18 @@ app.post('/authenticate', function (req, res) {
     console.log(newTx);
     console.log(newTx['email']);
     var userEmail = newTx['email'];
-    res.send('token123');
     //search db and see if email exists
     //if exists, send back cookie
     //if does not exist, create new document with user and send back cookie
-
+    var users = db.collection('users');
         if( users.find({email: userEmail}).limit(1).count() > 0) {
           //send back cookie
-
+          console.log('success123');
+          res.send('success123');
         } else {
+          console.log('fail123');
           //create new document with user and send back cookie
+          res.send('fail123');
         }
 
   });
