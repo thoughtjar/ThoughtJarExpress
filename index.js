@@ -124,8 +124,8 @@ app.post('/authenticate', function (req, res) {
         } else {
 
           db.collection('users').insertOne({
-            "email": newUserTx['email'],
-            "fullName": newUserTx['name'],
+            "email": newUserTx['payload']['email'],
+            "fullName": newUserTx['payload']['name'],
             "access-token": 'cotton'
           }).then(function(result) {
             console.log(result);
