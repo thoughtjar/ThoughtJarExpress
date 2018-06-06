@@ -136,7 +136,7 @@ fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', (err, cert) => {
 });
 });
 
-
+});
 
 app.get('/respond', function (req, res) {
   //token passed through url
