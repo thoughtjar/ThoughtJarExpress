@@ -65,49 +65,53 @@ app.post('/createSurvey', function (req, res) {
         console.log(decoded);
         console.log(decoded.dbId);
         clientDbId = decoded.dbId; // bar
+
+
+
+            var surveyCollection = db.collection('surveys');
+
+            const numberQuestions = Object.keys(req.body['questionsList']).length;
+            var questionsList = [];
+            for(var key in req.body['questionsList']) {
+              console.log(key);
+
+              let surveyQuestionData = {
+                questionType: req.body['questionsList'][key][0],
+                questionField: req.body['questionsList'][key][1],
+                answerOptions: req.body['questionsList'][key][2]
+              };
+              questionsList = questionsList.concat(surveyQuestionData);
+            }
+            console.log(questionsList);
+
+            const surveyData = {
+              "title": req.body['title'],
+              "description": req.body['description'],
+              "numQuestions": numberQuestions,
+              "questionList": questionsList,
+              "clientDbId": clientDbId
+            };
+
+            surveyCollection.insert(surveyData, function(err, result) {
+
+              if(err) {
+                throw err;
+              } else {
+                console.log(result);
+                var clientCollection = db.collection('clients');
+
+                clientCollection.update({ "_id" : clientID }, { $push: { "surveysOwned": result } }, function (err, result) {
+                  console.log("success2");
+                  res.send("success");
+                });
+
+              }
+
+            });
+
       });
     }) // get public key
 
-    var surveyCollection = db.collection('surveys');
-
-    const numberQuestions = Object.keys(req.body['questionsList']).length;
-    var questionsList = [];
-    for(var key in req.body['questionsList']) {
-      console.log(key);
-
-      let surveyQuestionData = {
-        questionType: req.body['questionsList'][key][0],
-        questionField: req.body['questionsList'][key][1],
-        answerOptions: req.body['questionsList'][key][2]
-      };
-      questionsList = questionsList.concat(surveyQuestionData);
-    }
-    console.log(questionsList);
-
-    const surveyData = {
-      "title": req.body['title'],
-      "description": req.body['description'],
-      "numQuestions": numberQuestions,
-      "questionList": questionsList,
-      "clientDbId": clientDbId
-    };
-
-    surveyCollection.insert(surveyData, function(err, result) {
-
-      if(err) {
-        throw err;
-      } else {
-        console.log(result);
-        var clientCollection = db.collection('clients');
-
-        clientCollection.update({ "_id" : clientID }, { $push: { "surveysOwned": result } }, function (err, result) {
-          console.log("success2");
-          res.send("success");
-        });
-
-      }
-
-    });
 
   });
 
