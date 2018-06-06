@@ -129,7 +129,7 @@ app.post('/authenticate', function (req, res) {
             "access-token": 'cotton'
           }).then(function(result) {
             console.log(result);
-            var newUserDataResponse ={"name": result['ops'][0]['fullName'], "email": result[0]['email'], "access-token": result[0]['token'], "dbId": result[0]['_id']};
+            var newUserDataResponse ={"name": result['ops'][0]['fullName'], "email": result['ops'][0]['email'], "access-token": result['ops'][0]['token'], "dbId": result['ops'][0]['_id']};
             res.send(newUserDataResponse);
           });
 
