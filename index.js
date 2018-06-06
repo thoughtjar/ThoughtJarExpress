@@ -142,7 +142,7 @@ app.post('/authenticate', function (req, res) {
 
 });
 
-app.get('/logout', function (req, res) {
+app.post('/logout', function (req, res) {
 
   users = db.collection('users');
 
