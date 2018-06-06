@@ -135,8 +135,8 @@ app.post('/authenticate', function (req, res) {
           var existingUserDataResponse ={"name": result[0]['fullName'], "email": result[0]['email'], "access-token": result[0]['access-token'], "dbId": result[0]['_id']};
 
           fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
-              jwt.sign(existingUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encrypedExistingUserDataResponse) {
-                res.send({"access-token": encrypedExistingUserDataResponse, "name": result[0]['fullName'], "email": result[0]['email']});
+              jwt.sign(existingUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedExistingUserDataResponse) {
+                res.send({"access-token": encryptedExistingUserDataResponse, "name": result[0]['fullName'], "email": result[0]['email']});
               });
           });
 
@@ -149,7 +149,11 @@ app.post('/authenticate', function (req, res) {
           }).then(function(result) {
             console.log(result);
             var newUserDataResponse ={"name": result['ops'][0]['fullName'], "email": result['ops'][0]['email'], "access-token": result['ops'][0]['access-token'], "dbId": result['ops'][0]['_id']};
-            res.send(newUserDataResponse);
+            fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
+                jwt.sign(newUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedNewUserDataResponse) {
+                  res.send({"access-token": encryptedNewUserDataResponse, "name": result['ops'][0]['fullName'], "email": result['ops'][0]['email']});
+                });
+            });
           });
 
 
