@@ -104,6 +104,7 @@ app.post('/authenticate', function (req, res) {
     //const domain = payload['hd'];
 
   }).then(function (newTx) {
+    var newUserTx = newTx;
     console.log(newTx);
     console.log('email: ' + newTx['payload']['email']);
   //  var userEmail = newTx['payload']['email'];
@@ -121,10 +122,10 @@ app.post('/authenticate', function (req, res) {
           var userDataResponse ={"name": result[0]['fullName'], "email": result[0]['email'], "access-token": result[0]['token']};
           res.send(userDataResponse);
         } else {
-          
+
           db.collection('users').insertOne({
-            "email": result[0]['email'],
-            "fullName": result[0]['name'],
+            "email": newUserTx['email'],
+            "fullName": newUserTx['name'],
             "access-token": 'cotton'
           }).then(function(result) {
             console.log(result);
