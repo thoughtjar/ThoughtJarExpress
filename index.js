@@ -56,7 +56,17 @@ app.get('/', (req, res) => {
 });
 
 app.post('/createSurvey', function (req, res) {
-    clientID = req.body.client;
+
+//decrypt access-token
+var clientDbId;
+fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
+  jwt.verify(req.body['access-token'], cert, function(err, decoded) {
+    console.log(decoded.dbId);
+    clientDbId = decoded.dbId; // bar
+  });
+});  // get public key
+
+
     var surveyCollection = db.collection('surveys');
 
     const numberQuestions = Object.keys(req.body).length;
@@ -74,8 +84,11 @@ app.post('/createSurvey', function (req, res) {
     console.log(questionsList);
 
     const surveyData = {
+      "title": req.body.title,
+      "description": req.body.description,
       "numQuestions": numberQuestions,
-      "questionList": questionsList
+      "questionList": questionsList,
+      "clientDbId": clientDbId
     };
 
     surveyCollection.insert(surveyData, function(err, result) {
