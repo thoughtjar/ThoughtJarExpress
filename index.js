@@ -45,11 +45,6 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
 
 //workspace
 
-fs.readFile('privateThoughts.pem', function (err, cert) {
-    jwt.sign({ foo: 'bar' }, cert, { algorithm: 'RS256' }, function(err, token) {
-      console.log(token);
-    });
-});
 
 
 
@@ -138,7 +133,13 @@ app.post('/authenticate', function (req, res) {
 
           console.log('user exists');
           var existingUserDataResponse ={"name": result[0]['fullName'], "email": result[0]['email'], "access-token": result[0]['access-token'], "dbId": result[0]['_id']};
-          res.send(existingUserDataResponse);
+
+          fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
+              jwt.sign(existingUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encrypedExistingUserDataResponse) {
+                res.send({"access-token": encrypedExistingUserDataResponse, "name": result[0]['fullName'], "email": result[0]['email']});
+              });
+          });
+
         } else {
 
           db.collection('users').insertOne({
