@@ -114,9 +114,9 @@ app.post('/authenticate', function (req, res) {
     users.find({email: newTx['payload']['email']}).toArray(function (err, result) {
       console.log(result);
         if(result.length > 0) {
-
           console.log('user exists');
-          res.send('exists123');
+          var userDataResponse ={"name": result[0]['fullName'], "email": result[0]['email'], "access-token": "access123"};
+          res.send(userDataResponse);
         } else {
           console.log('user does not exist');
           res.send('notexist123');
