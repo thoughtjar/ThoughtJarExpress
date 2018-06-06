@@ -121,6 +121,14 @@ app.post('/createSurvey', function (req, res) {
 
   });
 
+
+app.post('/jars', function (req, res) {
+//list jars
+
+});
+
+
+
 app.get('/respond', function (req, res) {
   //token passed through url
   //access token with req.query.uTx
