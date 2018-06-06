@@ -116,7 +116,7 @@ app.post('/createSurvey', function (req, res) {
 
       });
 
-    })
+    });
 
 
   });
@@ -124,7 +124,16 @@ app.post('/createSurvey', function (req, res) {
 
 app.post('/jars', function (req, res) {
 //list jars
+fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', (err, cert) => {
+  jwt.verify(req.body['access-token'], cert, (err, decoded) => {
 
+    users.find({ "_id" : ObjectId(decoded['dbId'])}, { 'surveysOwned' : 1 }).toArray(function (err, result) {
+
+        console.log(result);
+
+    });
+
+});
 });
 
 
