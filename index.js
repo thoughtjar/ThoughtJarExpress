@@ -145,7 +145,7 @@ app.post('/authenticate', function (req, res) {
 app.post('/logout', function (req, res) {
 
   users = db.collection('users');
-  console.log(req.body);
+  console.log(req.body.dbId);
 
 /*  users.update({ "_id" : req.body.data['dbId'] }, { $set: { "token": 'null' } }, function (err, result) {
     console.log("successfully logged out");
