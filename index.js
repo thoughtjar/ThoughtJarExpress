@@ -15,6 +15,7 @@ const app = express();
 
 var db;
 var clientID;
+var users;
 // support parsing of application/json type post data
 app.use(bodyParser.json());
 
@@ -109,10 +110,11 @@ app.post('/authenticate', function (req, res) {
     //search db and see if email exists
     //if exists, send back cookie
     //if does not exist, create new document with user and send back cookie
-    var users = db.collection('users');
-    users.find({email: newTx['payload']['email']}, function (err, result) {
+    users = db.collection('users');
+    users.find({email: newTx['payload']['email']}).toArray(function (err, result) {
       console.log(result);
-        if(result.toArray.length > 0) {
+        if(result.length > 0) {
+
           console.log('user exists');
           res.send('exists123');
         } else {
