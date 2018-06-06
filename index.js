@@ -119,8 +119,8 @@ app.post('/authenticate', function (req, res) {
           //if user exists
 
           console.log('user exists');
-          var userDataResponse ={"name": result[0]['fullName'], "email": result[0]['email'], "access-token": result[0]['token']};
-          res.send(userDataResponse);
+          var existingUserDataResponse ={"name": result[0]['fullName'], "email": result[0]['email'], "access-token": result[0]['token'], "dbId": result[0]['_id']};
+          res.send(existingUserDataResponse);
         } else {
 
           db.collection('users').insertOne({
@@ -129,7 +129,8 @@ app.post('/authenticate', function (req, res) {
             "access-token": 'cotton'
           }).then(function(result) {
             console.log(result);
-            res.send('notexist123');
+            var newUserDataResponse ={"name": result[0]['fullName'], "email": result[0]['email'], "access-token": result[0]['token'], "dbId": result[0]['_id']};
+            res.send(newUserDataResponse);
           });
 
 
