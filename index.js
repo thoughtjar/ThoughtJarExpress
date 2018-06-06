@@ -97,7 +97,7 @@ app.post('/createSurvey', function (req, res) {
               if(err) {
                 throw err;
               } else {
-                console.log(result);
+                console.log(JSON.stringify(result));
                 var users = db.collection('users');
                 console.log(clientDbId);
                 users.update({ "_id" : clientDbId }, { $set: { "surveysOwned": result } }, function (err, result1) {
