@@ -100,7 +100,7 @@ app.post('/createSurvey', function (req, res) {
                 console.log(result);
                 var clientCollection = db.collection('clients');
 
-                clientCollection.update({ "_id" : clientID }, { $push: { "surveysOwned": result } }, function (err, result) {
+                clientCollection.update({ "_id" : clientDbID }, { $push: { "surveysOwned": result } }, function (err, result) {
                   console.log("success2");
                   res.send("success");
                 });
@@ -110,7 +110,8 @@ app.post('/createSurvey', function (req, res) {
             });
 
       });
-    }) // get public key
+
+    })
 
 
   });
