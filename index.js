@@ -145,11 +145,12 @@ app.post('/authenticate', function (req, res) {
 app.post('/logout', function (req, res) {
 
   users = db.collection('users');
+  console.log(req.body);
 
-  users.update({ "_id" : req.body.data['dbId'] }, { $set: { "token": 'null' } }, function (err, result) {
+/*  users.update({ "_id" : req.body.data['dbId'] }, { $set: { "token": 'null' } }, function (err, result) {
     console.log("successfully logged out");
     res.send("successfully logged out");
-  });
+  }); */
 
 });
 
