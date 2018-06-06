@@ -1,3 +1,6 @@
+const fs = require('fs');
+const os = require('os');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -10,6 +13,8 @@ const client = new OAuth2Client('665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.a
 
 const async = require("async");
 const Promise = require('promise');
+
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
@@ -37,6 +42,19 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
   db = client.db('thought-jar-test');
 
 });
+
+//workspace
+
+fs.readFile('privateThoughts.pem', function (err, cert) {
+    jwt.sign({ foo: 'bar' }, cert, { algorithm: 'RS256' }, function(err, token) {
+      console.log(token);
+    });
+});
+
+
+
+
+//end worskpace
 
 app.get('/', (req, res) => {
   res.send('Hello World');
@@ -119,7 +137,7 @@ app.post('/authenticate', function (req, res) {
           //if user exists
 
           console.log('user exists');
-          var existingUserDataResponse ={"name": result[0]['fullName'], "email": result[0]['email'], "access-token": result[0]['token'], "dbId": result[0]['_id']};
+          var existingUserDataResponse ={"name": result[0]['fullName'], "email": result[0]['email'], "access-token": result[0]['access-token'], "dbId": result[0]['_id']};
           res.send(existingUserDataResponse);
         } else {
 
@@ -129,7 +147,7 @@ app.post('/authenticate', function (req, res) {
             "access-token": 'cotton'
           }).then(function(result) {
             console.log(result);
-            var newUserDataResponse ={"name": result['ops'][0]['fullName'], "email": result['ops'][0]['email'], "access-token": result['ops'][0]['token'], "dbId": result['ops'][0]['_id']};
+            var newUserDataResponse ={"name": result['ops'][0]['fullName'], "email": result['ops'][0]['email'], "access-token": result['ops'][0]['access-token'], "dbId": result['ops'][0]['_id']};
             res.send(newUserDataResponse);
           });
 
