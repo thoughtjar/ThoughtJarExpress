@@ -135,8 +135,20 @@ app.post('/authenticate', function (req, res) {
 
 
         }
+
     });
 
+  });
+
+});
+
+app.get('/logout', function (req, res) {
+
+  users = db.collection('users');
+
+  users.update({ "_id" : req.body.data['dbId'] }, { $set: { "token": 'null' } }, function (err, result) {
+    console.log("successfully logged out");
+    res.send("successfully logged out");
   });
 
 });
