@@ -113,13 +113,25 @@ app.post('/authenticate', function (req, res) {
     users = db.collection('users');
     users.find({email: newTx['payload']['email']}).toArray(function (err, result) {
       console.log(result);
+
         if(result.length > 0) {
+          //if user exists
+
           console.log('user exists');
-          var userDataResponse ={"name": result[0]['fullName'], "email": result[0]['email'], "access-token": "access123"};
+          var userDataResponse ={"name": result[0]['fullName'], "email": result[0]['email'], "access-token": result[0]['token']};
           res.send(userDataResponse);
         } else {
-          console.log('user does not exist');
-          res.send('notexist123');
+          
+          db.collection('users').insertOne({
+            "email": result[0]['email'],
+            "fullName": result[0]['name'],
+            "access-token": 'cotton'
+          }).then(function(result) {
+            console.log(result);
+            res.send('notexist123');
+          });
+
+
         }
     });
 
