@@ -41,7 +41,7 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
 
   db = client.db('thought-jar-test');
 
-});
+  });
 
 //workspace
 
@@ -100,7 +100,7 @@ app.post('/createSurvey', function (req, res) {
                 console.log(JSON.stringify(result));
                 var users = db.collection('users');
                 console.log(result['insertedIds']['0']);
-                users.update({ "_id" : clientDbId }, { $push: { "surveysOwned": result['insertedIds']['0'] } }, function (err, result1) {
+                users.update({ "_id" : ObjectId(clientDbId) }, { $push: { "surveysOwned": result['insertedIds']['0'] } }, function (err, result1) {
                   if(err){
                     console.log('error');
                   }else{
@@ -194,7 +194,7 @@ app.post('/logout', function (req, res) {
   users = db.collection('users');
   console.log(req.body.dbId);
 
-  users.update({ "_id" : req.body.dbId }, { $set: { "token": 'null' } }, function (err, result) {
+  users.update({ "_id" : ObjectId(req.body.dbId) }, { $set: { "token": 'null' } }, function (err, result) {
     console.log("successfully logged out");
     res.send("successfully logged out");
   });
