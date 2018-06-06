@@ -57,35 +57,36 @@ app.get('/', (req, res) => {
 
 app.post('/createSurvey', function (req, res) {
 
-//decrypt access-token
-var clientDbId;
-fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
-  jwt.verify(req.body['access-token'], cert, function(err, decoded) {
-    console.log(decoded.dbId);
-    clientDbId = decoded.dbId; // bar
-  });
-});  // get public key
-
+    //decrypt access-token
+    var clientDbId;
+    fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', (err, cert) => {
+      jwt.verify(req.body['access-token'], cert, (err, decoded) => {
+        console.log('token printing');
+        console.log(decoded);
+        console.log(decoded.dbId);
+        clientDbId = decoded.dbId; // bar
+      });
+    }) // get public key
 
     var surveyCollection = db.collection('surveys');
 
-    const numberQuestions = Object.keys(req.body).length;
+    const numberQuestions = Object.keys(req.body['questionsList']).length;
     var questionsList = [];
-    for(var key in req.body) {
+    for(var key in req.body['questionsList']) {
       console.log(key);
 
       let surveyQuestionData = {
-        questionType: req.body[key][0],
-        questionField: req.body[key][1],
-        answerOptions: req.body[key][2]
+        questionType: req.body['questionsList'][key][0],
+        questionField: req.body['questionsList'][key][1],
+        answerOptions: req.body['questionsList'][key][2]
       };
       questionsList = questionsList.concat(surveyQuestionData);
     }
     console.log(questionsList);
 
     const surveyData = {
-      "title": req.body.title,
-      "description": req.body.description,
+      "title": req.body['title'],
+      "description": req.body['description'],
       "numQuestions": numberQuestions,
       "questionList": questionsList,
       "clientDbId": clientDbId
