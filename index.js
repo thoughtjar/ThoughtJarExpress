@@ -99,12 +99,12 @@ app.post('/createSurvey', function (req, res) {
               } else {
                 console.log(result);
                 var users = db.collection('users');
-
-                users.update({ "_id" : clientDbId }, { $push: { "surveysOwned": result } }, function (err, result) {
+                console.log(clientDbId);
+                users.update({ "_id" : clientDbId }, { $set: { "surveysOwned": result } }, function (err, result1) {
                   if(err){
-                    console.log(err);
+                    console.log('error');
                   }else{
-                    console.log(result);
+                    console.log('aaaaaa');
                   }
                   console.log("success2");
                   res.send("success");
