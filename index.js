@@ -153,7 +153,7 @@ console.log(req.body);
               "description": result1[0]['description']
             });
             console.log("1: "+ JSON.stringify(surveyDetailsResponse));
-
+            res.send(surveyDetailsResponse);
         });
       });
 
