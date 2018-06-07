@@ -180,12 +180,11 @@ app.post('/fillJars', function (req, res) {
       console.log(decoded);
       surveys.find().toArray(function (err, result) {
         //get all surveys
-          console.log(result);
-          var surveysArray = result;
-          var surveyDetailsResponse = [];
+      console.log(result);
+      var surveysArray = result;
+      var surveyDetailsResponse = [];
 
       surveysArray.forEach(function (element) {
-        counter_unique ++;
             surveyDetailsResponse = surveyDetailsResponse.concat({
               "identifier": element['_id'],
               "title": element['title'],
