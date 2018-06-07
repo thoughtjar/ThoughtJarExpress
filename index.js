@@ -215,7 +215,12 @@ app.post('/fillJar', function(req, res) {
 
 //through email or text
 app.get('/fillJar', function (req, res) {
-  console.log(req.query);
+  //check if magic token is valid
+  db.collection('surveys').find({"_id" : ObjectId(req.query["identifier"])}).toArray(function (err, surveyData) {
+    console.log(surveyData[0]);
+    res.send(surveyData[0]);
+    
+  });
 });
 
 app.post('/authenticate', function (req, res) {
