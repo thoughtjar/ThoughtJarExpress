@@ -42,17 +42,10 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
   db = client.db('thought-jar-test');
 
 
-
-
-
-
-
-
   });
 
 
 //workspace
-
 
 
 
@@ -133,7 +126,13 @@ app.post('/myJars', function (req, res) {
   console.log("/myJars BEING CALLED");
   users = db.collection('users');
   fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', (err, cert) => {
+    if (err) {
+      res.send("error reading key");
+    }
     jwt.verify(req.body['access-token'], cert, (err, decoded) => {
+      if (err) {
+        res.send("error verifying token");
+      }
       console.log(decoded);
       users.find({ "_id" : ObjectId(decoded['dbId'])}, { 'surveysOwned' : 1 }).toArray(function (err, result) {
 
@@ -165,6 +164,45 @@ app.post('/myJars', function (req, res) {
   });
 
 });
+
+app.get('/fillJars', function (req, res) {
+
+  console.log("/fillJars BEING CALLED");
+  surveys = db.collection('surveys');
+  fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', (err, cert) => {
+    if (err) {
+      res.send("error reading key");
+    }
+    jwt.verify(req.body['access-token'], cert, (err, decoded) => {
+      if (err) {
+        res.send("error verifying token");
+      }
+      console.log(decoded);
+      surveys.find().toArray(function (err, result) {
+        //get all surveys
+          console.log(result);
+          var surveysArray = result;
+          var surveyDetailsResponse = [];
+
+      surveysArray.forEach(function (element) {
+        counter_unique ++;
+            surveyDetailsResponse = surveyDetailsResponse.concat({
+              "identifier": element['_id'],
+              "title": element['title'],
+              "description": element['description']
+            });
+            if(element === surveysArray[surveysArray.length -1]){
+              var data = {"jars": surveyDetailsResponse};
+              res.send(data);
+            };
+      });
+
+    });
+
+    });
+  });
+});
+
 
 app.get('/respond', function (req, res) {
   //token passed through url
