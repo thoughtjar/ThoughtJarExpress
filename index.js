@@ -130,8 +130,7 @@ app.post('/createSurvey', function (req, res) {
 
 
 app.post('/myJars', function (req, res) {
-//list jars
-
+  console.log("/myJars BEING CALLED");
   users = db.collection('users');
   fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', (err, cert) => {
     jwt.verify(req.body['access-token'], cert, (err, decoded) => {
@@ -142,29 +141,21 @@ app.post('/myJars', function (req, res) {
           var surveysArray = result[0]['surveysOwned'];
         //  console.log("survArr: " + surveysArray[0]);
           var surveyDetailsResponse = [];
-      var counter = 0;
+      var counter_unique = 0;
+      var final_response = []
       surveysArray.forEach(function (element) {
-        console.log('sdfghjklkjhgfdsdfghjkl,kjhgfd');
-        counter ++;
-        console.log(element);
+        counter_unique ++;
         db.collection('surveys').find({ "_id" : ObjectId(element)}).toArray(function (err, result1) {
-          console.log('COUNTER ==== '+counter);
-          console.log('result              '+ JSON.stringify(result1));
             surveyDetailsResponse = surveyDetailsResponse.concat({
               "identifier": result1[0]['_id'],
               "title": result1[0]['title'],
               "description": result1[0]['description']
             });
-            console.log("1: "+ JSON.stringify(surveyDetailsResponse));
-            if(counter === surveysArray.length){
-              console.log("SCREAMMIGNGA");
-              console.log("surveyDetailsResponse"+JSON.stringify(surveyDetailsResponse));
-              console.log("this is counter"+counter);
+            if(element === surveysArray[surveysArray.length -1]){
               var data = {"jars": surveyDetailsResponse};
               res.send(data);
             };
         });
-        console.log("surveydetailresponse"+JSON.stringify(surveyDetailsResponse));
       });
     });
 
