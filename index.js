@@ -40,11 +40,11 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
   }
 
   db = client.db('thought-jar-test');
+  var surveyDetailsResponse1;
 
   });
 
 //workspace
-
 
 
 
@@ -104,9 +104,9 @@ app.post('/createSurvey', function (req, res) {
                   if(err){
                     console.log('error');
                   }else{
-                    console.log('aaaaaa');
+                    console.log('success');
                   }
-                  console.log("success2");
+                  console.log("checkpoint");
                   res.send("success");
                 });
 
@@ -127,18 +127,34 @@ app.post('/myJars', function (req, res) {
 
 console.log(req.body);
 
-users = db.collection('users');
-fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', (err, cert) => {
-  jwt.verify(req.body['access-token'], cert, (err, decoded) => {
-    console.log(decoded);
-    users.find({ "_id" : ObjectId(decoded['dbId'])}, { 'surveysOwned' : 1 }).toArray(function (err, result) {
+  users = db.collection('users');
+  fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', (err, cert) => {
+    jwt.verify(req.body['access-token'], cert, (err, decoded) => {
+      console.log(decoded);
+      users.find({ "_id" : ObjectId(decoded['dbId'])}, { 'surveysOwned' : 1 }).toArray(function (err, result) {
+          var surveysArray = result[0]['surveysOwned'];
 
-        console.log(result);
+          var surveyDetailsResponse = [];
+          let counter = 0;
 
+          for(var surveyInArray in surveysArray) {
+            users.find({ "_id" : ObjectId(surveyInArray)}).toArray(function (err, result1) {
+
+                surveyDetailsResponse1 = surveyDetailsResponse1.concat({
+                  "identifier": result[counter]['_id'],
+                  "title": result[counter]['title'],
+                  "description": result[counter]['description']
+                });
+                counter++;
+
+            });
+          }
+
+          console.log(surveyDetailsResponse);
+
+      });
     });
-
-});
-});
+  });
 
 });
 
