@@ -165,7 +165,7 @@ app.post('/myJars', function (req, res) {
 
 });
 
-app.get('/fillJars', function (req, res) {
+app.post('/fillJars', function (req, res) {
 
   console.log("/fillJars BEING CALLED");
   surveys = db.collection('surveys');
@@ -204,9 +204,8 @@ app.get('/fillJars', function (req, res) {
 });
 
 
-app.get('/respond', function (req, res) {
-  //token passed through url
-  //access token with req.query.uTx
+app.get('/fillJar', function (req, res) {
+  console.log(req.query);
 });
 
 app.post('/authenticate', function (req, res) {
