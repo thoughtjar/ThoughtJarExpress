@@ -40,9 +40,16 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
   }
 
   db = client.db('thought-jar-test');
-  var surveyDetailsResponse1;
+
+
+
+
+
+
+
 
   });
+
 
 //workspace
 
@@ -132,27 +139,28 @@ console.log(req.body);
     jwt.verify(req.body['access-token'], cert, (err, decoded) => {
       console.log(decoded);
       users.find({ "_id" : ObjectId(decoded['dbId'])}, { 'surveysOwned' : 1 }).toArray(function (err, result) {
+          console.log(result);
           var surveysArray = result[0]['surveysOwned'];
-
+        //  console.log("survArr: " + surveysArray[0]);
           var surveyDetailsResponse = [];
-          let counter = 0;
-
-          for(var surveyInArray in surveysArray) {
-            users.find({ "_id" : ObjectId(surveyInArray)}).toArray(function (err, result1) {
-
-                surveyDetailsResponse1 = surveyDetailsResponse1.concat({
-                  "identifier": result[counter]['_id'],
-                  "title": result[counter]['title'],
-                  "description": result[counter]['description']
-                });
-                counter++;
-
+      surveysArray.forEach(function (element) {
+        console.log(element);
+        db.collection('surveys').find({ "_id" : ObjectId(element)}).toArray(function (err, result1) {
+          console.log('result              '+ JSON.stringify(result1));
+            surveyDetailsResponse = surveyDetailsResponse.concat({
+              "identifier": result1[0]['_id'],
+              "title": result1[0]['title'],
+              "description": result1[0]['description']
             });
-          }
+            console.log("1: "+ JSON.stringify(surveyDetailsResponse));
 
-          console.log(surveyDetailsResponse);
-
+        });
       });
+
+    });
+
+
+
     });
   });
 
