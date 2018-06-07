@@ -132,20 +132,23 @@ app.post('/createSurvey', function (req, res) {
 app.post('/myJars', function (req, res) {
 //list jars
 
-console.log(req.body);
-
   users = db.collection('users');
   fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', (err, cert) => {
     jwt.verify(req.body['access-token'], cert, (err, decoded) => {
       console.log(decoded);
       users.find({ "_id" : ObjectId(decoded['dbId'])}, { 'surveysOwned' : 1 }).toArray(function (err, result) {
+
           console.log(result);
           var surveysArray = result[0]['surveysOwned'];
         //  console.log("survArr: " + surveysArray[0]);
           var surveyDetailsResponse = [];
+      var counter = 0;
       surveysArray.forEach(function (element) {
+        console.log('sdfghjklkjhgfdsdfghjkl,kjhgfd');
+        counter ++;
         console.log(element);
         db.collection('surveys').find({ "_id" : ObjectId(element)}).toArray(function (err, result1) {
+          console.log('COUNTER ==== '+counter);
           console.log('result              '+ JSON.stringify(result1));
             surveyDetailsResponse = surveyDetailsResponse.concat({
               "identifier": result1[0]['_id'],
@@ -153,10 +156,16 @@ console.log(req.body);
               "description": result1[0]['description']
             });
             console.log("1: "+ JSON.stringify(surveyDetailsResponse));
-            res.send(surveyDetailsResponse);
+            if(counter === surveysArray.length){
+              console.log("SCREAMMIGNGA");
+              console.log("surveyDetailsResponse"+JSON.stringify(surveyDetailsResponse));
+              console.log("this is counter"+counter);
+              var data = {"jars": surveyDetailsResponse};
+              res.send(data);
+            };
         });
+        console.log("surveydetailresponse"+JSON.stringify(surveyDetailsResponse));
       });
-
     });
 
 
