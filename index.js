@@ -203,6 +203,17 @@ app.post('/fillJars', function (req, res) {
 });
 
 
+
+//through website
+app.post('/fillJar', function(req, res) {
+  console.log(req.body);
+  db.collection('surveys').find({"_id" : ObjectId(req.body["identifier"])}).toArray(function (err, surveyData) {
+    console.log(surveyData[0]);
+    res.send(surveyData[0]);
+  });
+});
+
+//through email or text
 app.get('/fillJar', function (req, res) {
   console.log(req.query);
 });
