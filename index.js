@@ -252,9 +252,10 @@ app.post('/fillJar', function(req, res) {
   var accessToken = null;
   var surveyData = null;
   if(req.body.magictoken) {
-
-    db.collection('magictoken').find({"mtoken" : req.body.magictoken}).toArray(function (err, tokenHolderData) {
+    console.log(req.body["magictoken"]);
+    db.collection('magictokens').find({"mtoken" : req.body["magictoken"]}).toArray(function (err, tokenHolderData) {
       if(err) {res.send("Magic Token Invalid")};
+      console.log(tokenHolderData);
       if(tokenHolderData[0]['surveyId'] != req.body.identifier) {res.send("Magic Token does not match survey")};
       db.collection('users').find({"_id": ObjectId(tokenHolderData[0]['userId'])}).toArray(function (err, result) {
         console.log('user exists');
