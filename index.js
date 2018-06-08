@@ -88,7 +88,8 @@ app.post('/createSurvey', function (req, res) {
               "description": req.body['description'],
               "numQuestions": numberQuestions,
               "questionList": questionsList,
-              "clientDbId": clientDbId
+              "clientDbId": clientDbId,
+              "responses": [],
             };
 
             surveyCollection.insert(surveyData, function(err, result) {
@@ -275,7 +276,7 @@ app.post('/respond', function (req, res) {
             res.send('success');
           }
         });
-        
+
       });
     });
 
