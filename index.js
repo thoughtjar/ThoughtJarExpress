@@ -41,48 +41,6 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
 
   db = client.db('thought-jar-test');
 
-
-    var accessToken = null;
-    var surveyData = null;
-
-      db.collection('magictokens').find({"mtoken" : '123456789'}).toArray(function (err, tokenHolderData) {
-        if(err) {console.log("Magic Token Invalid")};
-        console.log(tokenHolderData);
-        if(tokenHolderData[0]['surveyId'] != '5b19775e0b5e3f6f3b5e88bf') {console.log("Magic Token does not match survey")};
-        db.collection('users').find({"_id": ObjectId('5b183b737b92644cf25f4a80')}).toArray(function (err, result) {
-          console.log('user exists');
-          console.log("result", result);
-          var tokenUserDataResponse ={"name": result[0]['fullName'], "email": result[0]['email'], "access-token": result[0]['access-token'], "dbId": result[0]['_id']};
-          fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
-              jwt.sign(tokenUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedExistingUserDataResponse) {
-                console.log("done1");
-                accessToken = encryptedExistingUserDataResponse;
-                complete();
-              });
-          });
-      });
-    });
-
-
-    db.collection('surveys').find({"_id" : ObjectId('5b19775e0b5e3f6f3b5e88bf')}).toArray(function (err, surveySearchResult) {
-      console.log("done2");
-      surveyData = surveySearchResult[0];
-      complete();
-    });
-
-    function complete() {
-      console.log("hi");
-      console.log("accessToken: ", accessToken);
-      console.log("surveyData: ", surveyData);
-      if(accessToken !== null && surveyData !== null) {
-        console.log('complete');
-        console.log({"access-token": accessToken, "surveyData": surveyData});
-      //  res.send({"access-token": accessToken, "surveyData": surveyData});
-      }
-    }
-
-
-
   });
 
 
@@ -291,6 +249,37 @@ app.post('/fillJar', function(req, res) {
   }
 
 });
+
+
+app.post('/respond', function (req, res) {
+
+  fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
+
+      if (err) {
+        res.send("error reading key");
+      }
+
+      jwt.verify(req.body['access-token'], cert, function (err, decoded) {
+
+          if (err) {
+            res.send("error verifying token");
+          }
+
+          var responseData = {"_id": decoded['dbId'], "response": req.body.response};
+
+        db.collection('surveys').update({ "_id" : ObjectId(req.body.surveyId) }, { $push: { "responses": responseData } }, function (err, result) {
+          if (err) {
+            res.send('error adding to database');
+          } else {
+            res.send('success');
+          }
+        });
+        
+      });
+    });
+
+});
+
 
 app.post('/authenticate', function (req, res) {
 
