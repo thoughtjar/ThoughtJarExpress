@@ -281,7 +281,11 @@ app.post('/fillJar', function(req, res) {
     if(accessToken !== null && surveyData !== null) {
       console.log('complete');
       console.log({"access-token": accessToken, "surveyData": surveyData});
-      res.send({"access-token": accessToken, "surveyData": surveyData});
+      if(accessToken == 0) {
+        res.send({"surveyData": surveyData});
+      } else {
+        res.send({"access-token": accessToken, "surveyData": surveyData});
+      }
     }
   }
 
