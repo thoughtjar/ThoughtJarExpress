@@ -15,3 +15,11 @@ example:
     "3": ["multiplechoice", "What is your favorite type of chocolate?", ["Dark", "Milk", "Orange"]]
   }
 }
+
+{
+  access-token: "cookies",
+  response: {
+    'Question1': adfaafa,
+    ''
+  }
+}

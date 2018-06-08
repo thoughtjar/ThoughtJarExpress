@@ -141,6 +141,7 @@ app.post('/myJars', function (req, res) {
         //  console.log("survArr: " + surveysArray[0]);
           var surveyDetailsResponse = [];
       var counter_unique = 0;
+      var noResults = true;
       surveysArray.forEach(function (element) {
         //console.log("ELEMENT ===="+element);
         db.collection('surveys').find({ "_id" : ObjectId(element)}).toArray(function (err, result1) {
@@ -153,11 +154,16 @@ app.post('/myJars', function (req, res) {
               "description": result1[0]['description']
             });
             if(counter_unique === surveysArray.length){
+              noResults = false;
               var data = {"jars": surveyDetailsResponse};
               res.send(data);
             };
         });
       });
+      if(noResults){
+        var data = {"jars": []};
+        res.send(data);
+      };
     });
 
 
@@ -185,6 +191,7 @@ app.post('/fillJars', function (req, res) {
       console.log(result);
       var surveysArray = result;
       var surveyDetailsResponse = [];
+      var noResults = true;
       surveysArray.forEach(function (element) {
             surveyDetailsResponse = surveyDetailsResponse.concat({
               "identifier": element['_id'],
@@ -196,7 +203,10 @@ app.post('/fillJars', function (req, res) {
               res.send(data);
             };
       });
-
+      if(noResults){
+        var data = {"jars": []};
+        res.send(data);
+      };
     });
 
     });
@@ -267,12 +277,14 @@ app.post('/respond', function (req, res) {
             res.send("error verifying token");
           }
 
-          var responseData = {"_id": decoded['dbId'], "response": req.body.response};
+          var responseData = {"responderId": decoded['dbId'], "response": req.body.response};
+          console.log("respinse data", responseData);
 
         db.collection('surveys').update({ "_id" : ObjectId(req.body.surveyId) }, { $push: { "responses": responseData } }, function (err, result) {
           if (err) {
             res.send('error adding to database');
           } else {
+            console.log('SUCCESS adding response');
             res.send('success');
           }
         });
