@@ -182,16 +182,18 @@ app.post('/myJars', function (req, res) {
         //  console.log("survArr: " + surveysArray[0]);
           var surveyDetailsResponse = [];
       var counter_unique = 0;
-      var final_response = []
       surveysArray.forEach(function (element) {
-        counter_unique ++;
+        //console.log("ELEMENT ===="+element);
         db.collection('surveys').find({ "_id" : ObjectId(element)}).toArray(function (err, result1) {
+          counter_unique ++;
+          //console.log("ELEMENT ===="+element);
+          //console.log("result ===="+JSON.stringify(result1));
             surveyDetailsResponse = surveyDetailsResponse.concat({
               "identifier": result1[0]['_id'],
               "title": result1[0]['title'],
               "description": result1[0]['description']
             });
-            if(element === surveysArray[surveysArray.length -1]){
+            if(counter_unique === surveysArray.length){
               var data = {"jars": surveyDetailsResponse};
               res.send(data);
             };
@@ -224,7 +226,6 @@ app.post('/fillJars', function (req, res) {
       console.log(result);
       var surveysArray = result;
       var surveyDetailsResponse = [];
-
       surveysArray.forEach(function (element) {
             surveyDetailsResponse = surveyDetailsResponse.concat({
               "identifier": element['_id'],
