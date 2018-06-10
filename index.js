@@ -184,34 +184,37 @@ app.post('/myJars', function (req, res) {
       }
       console.log(decoded);
       users.find({ "_id" : ObjectId(decoded['dbId'])}, { 'surveysOwned' : 1 }).toArray(function (err, result) {
+        if(result[0]['surveysOwned'].length === 0) {
+          var blankData = {
+            "jars": []
+          }
+          res.send(blankData);
+        }else{
 
-          console.log(result);
-          var surveysArray = result[0]['surveysOwned'];
-        //  console.log("survArr: " + surveysArray[0]);
-          var surveyDetailsResponse = [];
-      var counter_unique = 0;
-      var noResults = true;
-      surveysArray.forEach(function (element) {
-        //console.log("ELEMENT ===="+element);
-        db.collection('surveys').find({ "_id" : ObjectId(element)}).toArray(function (err, result1) {
-          counter_unique ++;
+            console.log(result);
+            var surveysArray = result[0]['surveysOwned'];
+          //  console.log("survArr: " + surveysArray[0]);
+            var surveyDetailsResponse = [];
+        var counter_unique = 0;
+        var noResults = true;
+        surveysArray.forEach(function (element) {
           //console.log("ELEMENT ===="+element);
-          //console.log("result ===="+JSON.stringify(result1));
-            surveyDetailsResponse = surveyDetailsResponse.concat({
-              "identifier": result1[0]['_id'],
-              "title": result1[0]['title'],
-              "description": result1[0]['description']
-            });
-            if(counter_unique === surveysArray.length){
-              noResults = false;
-              var data = {"jars": surveyDetailsResponse};
-              res.send(data);
-            };
+          db.collection('surveys').find({ "_id" : ObjectId(element)}).toArray(function (err, result1) {
+            counter_unique ++;
+            //console.log("ELEMENT ===="+element);
+            //console.log("result ===="+JSON.stringify(result1));
+              surveyDetailsResponse = surveyDetailsResponse.concat({
+                "identifier": result1[0]['_id'],
+                "title": result1[0]['title'],
+                "description": result1[0]['description']
+              });
+              if(counter_unique === surveysArray.length){
+                noResults = false;
+                var data = {"jars": surveyDetailsResponse};
+                res.send(data);
+              };
+          });
         });
-      });
-      if(noResults){
-        var data = {"jars": []};
-        res.send(data);
       };
     });
 
@@ -236,26 +239,28 @@ app.post('/fillJars', function (req, res) {
       }
       console.log(decoded);
       surveys.find().toArray(function (err, result) {
-        //get all surveys
       console.log(result);
-      var surveysArray = result;
-      var surveyDetailsResponse = [];
-      var noResults = true;
-      surveysArray.forEach(function (element) {
-            surveyDetailsResponse = surveyDetailsResponse.concat({
-              "identifier": element['_id'],
-              "title": element['title'],
-              "description": element['description']
-            });
-            if(element === surveysArray[surveysArray.length -1]){
-              var data = {"jars": surveyDetailsResponse};
-              res.send(data);
-            };
-      });
-      if(noResults){
-        var data = {"jars": []};
-        res.send(data);
-      };
+      if(result.length === 0){
+        var blankData = {
+          "jars": []
+        };
+        res.send(blankData);
+      }else{
+        console.log(result);
+        var surveysArray = result;
+        var surveyDetailsResponse = [];
+        surveysArray.forEach(function (element) {
+              surveyDetailsResponse = surveyDetailsResponse.concat({
+                "identifier": element['_id'],
+                "title": element['title'],
+                "description": element['description']
+              });
+              if(element === surveysArray[surveysArray.length -1]){
+                var data = {"jars": surveyDetailsResponse};
+                res.send(data);
+              };
+        });
+      }
     });
 
     });
