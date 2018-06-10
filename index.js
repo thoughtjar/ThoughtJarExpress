@@ -11,7 +11,8 @@ const ObjectId = require('mongodb').ObjectId;
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client('665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.apps.googleusercontent.com');
 
-const async = require("async");
+//const async = require('async');
+//const await = require('asyncawait/await');
 const Promise = require('promise');
 
 const jwt = require('jsonwebtoken');
@@ -41,7 +42,47 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
 
   db = client.db('thought-jar-test');
 
-  });
+  mainExc();
+
+  async function mainExc() {
+    var numberArray = [];
+    let queryResult = await db.collection('users').find().toArray();
+
+    for(let i = 0; i < queryResult.length; i++) {
+        let token = await generateMagicToken();
+        let mTokenData = {
+          "mtoken": token,
+          "theusersId": queryResult[i]['_id'],
+          "surveyId": '123445'
+        };
+
+
+        let insertWaiter = await db.collection('magictokens').insert(mTokenData);
+
+        numberArray = numberArray.concat({phone: queryResult[i]['phone'], magic: token});
+        console.log(numberArray);
+    };
+
+  };
+
+
+  async function generateMagicToken() {
+
+    var token = "";
+    var possibleLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 10; i++) {
+      if(i % 2 == 0) {
+        token += possibleLetters.charAt(Math.floor(Math.random() * possibleLetters.length));
+      } else {
+        token += Math.floor(Math.random() * 10);
+      }
+      if(token.length == 10) {return token};
+    }
+
+  }
+
+});
 
 
 //workspace
@@ -120,6 +161,14 @@ app.post('/createSurvey', function (req, res) {
 
 
   });
+
+
+  app.post('/distribute', function (req, res) {
+    db.collection('users').find().toArray(function (err, result) {
+      console.log(result);
+    });
+  });
+
 
 
 app.post('/myJars', function (req, res) {
