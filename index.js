@@ -254,7 +254,7 @@ app.post('/myJar', function (req, res) {
 
     async function getAnalysis(finalData) {
       var options = {
-        uri: '0.0.0.0:8081',
+        uri: 'http://localhost:8081/csv',
         method: 'POST',
         body: {
           "responseContent": finalData

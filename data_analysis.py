@@ -8,10 +8,14 @@ application = Flask(__name__)
 def hello():
     return "Hello World!"
 
-@application.route("/csv")
+@application.route("/csv", methods=['POST'])
 def getCSV():
-    print(request.data)
-    responseContent = json.loads(request.data["responseContent"])
+    print("CSVVVVVV")
+    data = json.loads(request.data)
+    print(type(data))
+    print(data["responseContent"])
+    #rint(request.data)
+    responseContent = data["responseContent"]
     print(responseContent[0].keys())
     #f = csv.writer(open("data.csv", "wb+"))
     return "success"
