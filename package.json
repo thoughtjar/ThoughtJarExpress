@@ -26,6 +26,8 @@
     "google-auth-library": "^1.5.0",
     "jsonwebtoken": "^8.2.2",
     "mongodb": "^3.0.10",
-    "promise": "^8.0.1"
+    "promise": "^8.0.1",
+    "request": "^2.87.0",
+    "request-promise": "^4.2.2"
   }
 }

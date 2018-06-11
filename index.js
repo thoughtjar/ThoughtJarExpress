@@ -3,6 +3,7 @@ const os = require('os');
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const rp = require('request-promise');
 
 const mongodb = require('mongodb');
 const MONGO_URL = 'mongodb://kaushik:kaushik123@ds235609.mlab.com:35609/thought-jar-test';
@@ -229,13 +230,9 @@ app.post('/myJar', function (req, res) {
 
   getResponsesById().then(function(surveyData) {
     removeIdentifiers(surveyData).then(function(finalData) {
-
-      res.send(
-        {
-          "documents": {finalData}
-        }
-      )
-
+      getAnalysis(finalData).then(function (analysis) {
+        res.send(analysis);
+      });
     });
   });
 
@@ -254,6 +251,20 @@ app.post('/myJar', function (req, res) {
         }
       }
     };
+
+    async function getAnalysis(finalData) {
+      var options = {
+        uri: '0.0.0.0:8081',
+        headers: {
+          'User-Agent': 'Request-Promise'
+        },
+        json: true // Automatically parses the JSON string in the response
+      };
+
+      let analysis = await rp(options);
+      return analysis
+      
+    }
 
 
 });
