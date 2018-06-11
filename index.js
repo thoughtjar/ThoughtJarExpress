@@ -42,7 +42,7 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
 
   db = client.db('thought-jar-test');
 
-  mainExc();
+  //mainExc();
 
   async function mainExc() {
     var numberArray = [];
@@ -224,6 +224,40 @@ app.post('/myJars', function (req, res) {
   });
 
 });
+
+app.post('/myJar', function (req, res) {
+
+  getResponsesById().then(function(surveyData) {
+    removeIdentifiers(surveyData).then(function(finalData) {
+
+      res.send(
+        {
+          "responseContent": finalData
+        }
+      )
+
+    });
+  });
+
+    async function getResponsesById() {
+      let surveyData = await db.collection('surveys').find({"_id" : ObjectId(req.body.identifier)}).toArray();
+      return await surveyData[0].responses;
+    };
+
+    async function removeIdentifiers(surveyData) {
+      let finalData = [];
+
+      for(i = 0; i < surveyData.length; i++) {
+        finalData = await finalData.concat(surveyData[i].response);
+        if(finalData.length === surveyData.length) {
+          return finalData
+        }
+      }
+    };
+
+
+});
+
 
 app.post('/fillJars', function (req, res) {
 
