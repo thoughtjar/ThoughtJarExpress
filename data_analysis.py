@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, send_file
 import csv
 import json
 
@@ -16,9 +16,20 @@ def getCSV():
     print(data["responseContent"])
     #rint(request.data)
     responseContent = data["responseContent"]
-    print(responseContent[0].keys())
-    #f = csv.writer(open("data.csv", "wb+"))
-    return "success"
+    print("hERE")
+    print(list(responseContent[0].keys()))
+    f = csv.writer(open("data.csv", "w"))
+    #f.writerow(list(responseContent[0].keys()))
+    for response in responseContent:
+        row = []
+        for key in responseContent[0].keys():
+            row.append(response[key])
+        print(row)
+        f.writerow(row)
+    try:
+        return send_file('./data.csv')
+    except Exception as e:
+        return str(e)
 
 if __name__ == "__main__":
     application.run(host='0.0.0.0', port=8081)

@@ -259,7 +259,7 @@ app.post('/myJar', function (req, res) {
         body: {
           "responseContent": finalData
         },
-        json: true // Automatically parses the JSON string in the response
+        json: false // Automatically parses the JSON string in the response
       };
 
       let analysis = await rp(options);
