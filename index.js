@@ -232,7 +232,7 @@ app.post('/myJar', function (req, res) {
 
       res.send(
         {
-          "responseContent": finalData
+          "documents": {finalData}
         }
       )
 
