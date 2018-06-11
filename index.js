@@ -255,15 +255,16 @@ app.post('/myJar', function (req, res) {
     async function getAnalysis(finalData) {
       var options = {
         uri: '0.0.0.0:8081',
-        headers: {
-          'User-Agent': 'Request-Promise'
+        method: 'POST',
+        body: {
+          "responseContent": finalData
         },
         json: true // Automatically parses the JSON string in the response
       };
 
       let analysis = await rp(options);
       return analysis
-      
+
     }
 
 
