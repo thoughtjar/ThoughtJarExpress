@@ -232,16 +232,16 @@ app.post('/myJars', function (req, res) {
 
 app.post('/myJar', function (req, res) {
 
+  var fullData;
   getResponsesById().then(function(surveyData) {
     removeIdentifiers(surveyData).then(function(finalData) {
-      getAnalysis(finalData).then(function (analysis) {
-        res.send(analysis);
-      });
+      getAnalysis(finalData);
     });
   });
 
     async function getResponsesById() {
       let surveyData = await db.collection('surveys').find({"_id" : ObjectId(req.body.identifier)}).toArray();
+      fullData = surveyData;
       return await surveyData[0].responses;
     };
 
@@ -266,10 +266,17 @@ app.post('/myJar', function (req, res) {
         headers:{
           'Content-Type': 'application/json'
         }
-      }).then(res => {
-        console.log(res);
-        return res.text().then((text) => {
+      }).then(response => {
+        return response.text().then((text) => {
+          console.log('Printing FUll Data');
+          console.log(fullData);
           console.log(text);
+          var data = {
+            'title': fullData[0]['title'],
+            'questionList': fullData[0]['questionList'],
+            'responseCSV': text,
+          };
+          res.send(data);
         })
       }).catch(error => console.error('Error:', error))
       .then(response => console.log('Success'));
