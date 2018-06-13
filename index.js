@@ -39,6 +39,8 @@ app.use(function(req, res, next) {
   next();
 });
 
+
+
 mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
 
   if(err) {
@@ -47,47 +49,59 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
 
   db = client.db('thought-jar-test');
 
-  //mainExc();
+  var responses = {};
+  responses['first'] = [];
+  var surveyToBeAnalyzed;
+  getResponsesToBeAnalyzed().then(function(survey) {
+    firstLoopResponse(survey[0].responses).then(function() {
 
-  async function mainExc() {
-    var numberArray = [];
-    let queryResult = await db.collection('users').find().toArray();
+      if(false === false) { //req.body.oneVar
+        secondLoopResponse(surveyToBeAnalyzed[0].responses).then(function() {
+          console.log(responses);
+        });
+      }
+    })
+  });
 
-    for(let i = 0; i < queryResult.length; i++) {
-        let token = await generateMagicToken();
-        let mTokenData = {
-          "mtoken": token,
-          "theusersId": queryResult[i]['_id'],
-          "surveyId": '123445'
-        };
-
-
-        let insertWaiter = await db.collection('magictokens').insert(mTokenData);
-
-        numberArray = numberArray.concat({phone: queryResult[i]['phone'], magic: token});
-        console.log(numberArray);
-    };
-
+  async function getResponsesToBeAnalyzed() {
+    surveyToBeAnalyzed = await db.collection('surveys').find({"_id": ObjectId('5b21757e547afc8b282381e1')}).toArray(); //req.body.identifier
+  /*  if (req.body.oneVar == true) {
+    for (let i = 0; i < )
+    } else {
+      responsesToBeAnalyzed[0] = await
+    } */
+    return surveyToBeAnalyzed
   };
 
 
-  async function generateMagicToken() {
+  var firstRes = 'Question1'
+  var secondRes = 'Question2'
 
-    var token = "";
-    var possibleLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  async function firstLoopResponse(surveyArr) {
 
-    for (var i = 0; i < 10; i++) {
-      if(i % 2 == 0) {
-        token += possibleLetters.charAt(Math.floor(Math.random() * possibleLetters.length));
-      } else {
-        token += Math.floor(Math.random() * 10);
+
+
+    for(let j = 0; j < surveyArr.length; j++) {
+      responses['first'] = await responses['first'].concat(surveyArr[j].response[firstRes]);
+      console.log('res1', responses);
+      if(j === surveyArr.length) {
+        return 0;
       }
-      if(token.length == 10) {return token};
+    }
+}
+
+  async function secondLoopResponse(surveyArr) {
+
+    responses['second'] = [];
+    for(let i = 0; i < surveyArr.length; i++) {
+      responses['second'] = await responses['second'].concat(surveyArr[i].response[secondRes]);
+      console.log('res2', responses);
     }
 
   }
 
-});
+
+    });
 
 
 //workspace
@@ -169,10 +183,45 @@ app.post('/createSurvey', function (req, res) {
 
 
   app.post('/distribute', function (req, res) {
-    db.collection('users').find().toArray(function (err, result) {
-      console.log(result);
-    });
-  });
+    mainExc();
+
+    async function mainExc() {
+      var numberArray = [];
+      let queryResult = await db.collection('users').find().toArray();
+
+      for(let i = 0; i < queryResult.length; i++) {
+          let token = await generateMagicToken();
+          let mTokenData = {
+            "mtoken": token,
+            "theusersId": queryResult[i]['_id'],
+            "surveyId": '123445'
+          };
+
+
+          let insertWaiter = await db.collection('magictokens').insert(mTokenData);
+
+          numberArray = numberArray.concat({phone: queryResult[i]['phone'], magic: token});
+          console.log(numberArray);
+      };
+  };
+
+  async function generateMagicToken() {
+
+    var token = "";
+    var possibleLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 10; i++) {
+      if(i % 2 == 0) {
+        token += possibleLetters.charAt(Math.floor(Math.random() * possibleLetters.length));
+      } else {
+        token += Math.floor(Math.random() * 10);
+      }
+      if(token.length == 10) {return token};
+    }
+
+  }
+
+});
 
 
 
@@ -312,6 +361,27 @@ app.post('/myJar', function (req, res) {
       return "ssssss"
       */
     }
+
+});
+
+app.post('/analysis', function (req, res) {
+  getResponsesToBeAnalyzed().then(function (survey) {
+    console.log();
+  });
+
+  async function getResponsesToBeAnalyzed() {
+    var surveyToBeAnalyzed = await db.collection('surveys').find({"_id": ObjectId('5b21757e547afc8b282381e1')}).toArray(); //add in req.body.identifier
+    return surveyToBeAnalyzed;
+  /*  if (req.body.oneVar == true) {
+    for (let i = 0; i < )
+    } else {
+      responsesToBeAnalyzed[0] = await
+    } */
+
+  }
+  async function asdf() {
+
+  }
 
 });
 
