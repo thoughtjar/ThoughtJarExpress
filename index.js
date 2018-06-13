@@ -47,7 +47,7 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
     throw err;
   }
 
-
+    db = client.db('thought-jar-test');
 
     });
 
@@ -277,42 +277,11 @@ app.post('/myJar', function (req, res) {
         })
       }).catch(error => console.error('Error:', error))
       .then(response => console.log('Success'));
-      /*
-      var options = {
-        host: 'localhost',
-        port: '8081',
-        path: '/csv',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      };
-
-      //var file = fs.createWriteStream("dataReturn.csv");
-      let analysis = await http.request(options);
-      console.log(analysis);
-      //let temp = await analysis.pipe(file);
-      return "ssssss"
-      */
-      /*
-      var options = {
-        uri: 'http://localhost:8081/csv',
-        method: 'POST',
-        body: {
-          'responseContent': finalData
-        },
-        json: true
-      };
-      let analysis = await rp(options); //.pipe(fs.createWriteStream('dataReturn.csv'));
-      //console.log(analysis);
-      //analysis.pipe(fs.createw)
-      return "ssssss"
-      */
     }
 
 });
 
-app.post('/analysis', function (req, res) {
+app.post('/myJarAnalysis', function (req, res) {
 
   var responses = {};
   responses['first'] = [];
@@ -324,6 +293,26 @@ app.post('/analysis', function (req, res) {
         secondLoopResponse(surveyToBeAnalyzed[0].responses).then(function() {
           console.log(responses);
           //send response to python here
+          if(req.body.oneVar){
+            if(req.body.firstQuestionType === "numberanswer"){
+              fetch("http://localhost:8081/oneVarNum", {
+                method: 'POST',
+                body: JSON.stringify(responses),
+                headers:{
+                  'Content-Type': 'application/json'
+                }
+              }).then(response => {
+                return response.text().then((text) => {
+                  console.log(text);
+                  var data = {
+                    'src': text
+                  };
+                  res.send(data);
+                })
+              }).catch(error => console.error('Error:', error))
+              .then(response => console.log('Success'));
+            }
+          }
         });
       }
     })
@@ -341,7 +330,7 @@ app.post('/analysis', function (req, res) {
   async function firstLoopResponse(surveyArr) {
 
     for(let j = 0; j < surveyArr.length; j++) {
-      responses['first'] = await responses['first'].concat(surveyArr[j].response[firstResponseId]);
+      responses['first'] = await responses['first'].concat(surveyArr[j].response[req.body.firstResponseId]);
       //console.log('res1', responses);
       if(j === surveyArr.length) {
         return 0;
@@ -354,7 +343,7 @@ app.post('/analysis', function (req, res) {
 
     responses['second'] = [];
     for(let i = 0; i < surveyArr.length; i++) {
-      responses['second'] = await responses['second'].concat(surveyArr[i].response[secondResponseId]);
+      responses['second'] = await responses['second'].concat(surveyArr[i].response[req.body.secondResponseId]);
       console.log('res2', responses);
     }
 
