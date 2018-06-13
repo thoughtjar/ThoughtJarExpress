@@ -1,3 +1,5 @@
+const fetch = require('node-fetch');
+
 const fs = require('fs');
 const os = require('os');
 
@@ -17,6 +19,8 @@ const client = new OAuth2Client('665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.a
 const Promise = require('promise');
 
 const jwt = require('jsonwebtoken');
+
+var http = require('http');
 
 const app = express();
 
@@ -228,16 +232,16 @@ app.post('/myJars', function (req, res) {
 
 app.post('/myJar', function (req, res) {
 
+  var fullData;
   getResponsesById().then(function(surveyData) {
     removeIdentifiers(surveyData).then(function(finalData) {
-      getAnalysis(finalData).then(function (analysis) {
-        res.send(analysis);
-      });
+      getAnalysis(finalData);
     });
   });
 
     async function getResponsesById() {
       let surveyData = await db.collection('surveys').find({"_id" : ObjectId(req.body.identifier)}).toArray();
+      fullData = surveyData;
       return await surveyData[0].responses;
     };
 
@@ -253,18 +257,60 @@ app.post('/myJar', function (req, res) {
     };
 
     async function getAnalysis(finalData) {
-      var options = {
-        uri: '0.0.0.0:8081',
+      data = {
+        'responseContent': finalData
+      }
+      fetch("http://localhost:8081/csv", {
         method: 'POST',
-        body: {
-          "responseContent": finalData
-        },
-        json: true // Automatically parses the JSON string in the response
+        body: JSON.stringify(data),
+        headers:{
+          'Content-Type': 'application/json'
+        }
+      }).then(response => {
+        return response.text().then((text) => {
+          console.log('Printing FUll Data');
+          console.log(fullData);
+          console.log(text);
+          var data = {
+            'title': fullData[0]['title'],
+            'questionList': fullData[0]['questionList'],
+            'responseCSV': text,
+          };
+          res.send(data);
+        })
+      }).catch(error => console.error('Error:', error))
+      .then(response => console.log('Success'));
+      /*
+      var options = {
+        host: 'localhost',
+        port: '8081',
+        path: '/csv',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       };
 
-      let analysis = await rp(options);
-      return analysis
-
+      //var file = fs.createWriteStream("dataReturn.csv");
+      let analysis = await http.request(options);
+      console.log(analysis);
+      //let temp = await analysis.pipe(file);
+      return "ssssss"
+      */
+      /*
+      var options = {
+        uri: 'http://localhost:8081/csv',
+        method: 'POST',
+        body: {
+          'responseContent': finalData
+        },
+        json: true
+      };
+      let analysis = await rp(options); //.pipe(fs.createWriteStream('dataReturn.csv'));
+      //console.log(analysis);
+      //analysis.pipe(fs.createw)
+      return "ssssss"
+      */
     }
 
 });
