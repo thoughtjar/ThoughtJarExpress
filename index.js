@@ -47,58 +47,6 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
     throw err;
   }
 
-  db = client.db('thought-jar-test');
-
-  var responses = {};
-  responses['first'] = [];
-  var surveyToBeAnalyzed;
-  getResponsesToBeAnalyzed().then(function(survey) {
-    firstLoopResponse(survey[0].responses).then(function() {
-
-      if(false === false) { //req.body.oneVar
-        secondLoopResponse(surveyToBeAnalyzed[0].responses).then(function() {
-          console.log(responses);
-        });
-      }
-    })
-  });
-
-  async function getResponsesToBeAnalyzed() {
-    surveyToBeAnalyzed = await db.collection('surveys').find({"_id": ObjectId('5b21757e547afc8b282381e1')}).toArray(); //req.body.identifier
-  /*  if (req.body.oneVar == true) {
-    for (let i = 0; i < )
-    } else {
-      responsesToBeAnalyzed[0] = await
-    } */
-    return surveyToBeAnalyzed
-  };
-
-
-  var firstRes = 'Question1'
-  var secondRes = 'Question2'
-
-  async function firstLoopResponse(surveyArr) {
-
-
-
-    for(let j = 0; j < surveyArr.length; j++) {
-      responses['first'] = await responses['first'].concat(surveyArr[j].response[firstRes]);
-      console.log('res1', responses);
-      if(j === surveyArr.length) {
-        return 0;
-      }
-    }
-}
-
-  async function secondLoopResponse(surveyArr) {
-
-    responses['second'] = [];
-    for(let i = 0; i < surveyArr.length; i++) {
-      responses['second'] = await responses['second'].concat(surveyArr[i].response[secondRes]);
-      console.log('res2', responses);
-    }
-
-  }
 
 
     });
@@ -365,21 +313,50 @@ app.post('/myJar', function (req, res) {
 });
 
 app.post('/analysis', function (req, res) {
-  getResponsesToBeAnalyzed().then(function (survey) {
-    console.log();
+
+  var responses = {};
+  responses['first'] = [];
+  var surveyToBeAnalyzed;
+  getResponsesToBeAnalyzed().then(function(survey) {
+    firstLoopResponse(survey[0].responses).then(function() {
+
+      if(false === false) { //req.body.oneVar
+        secondLoopResponse(surveyToBeAnalyzed[0].responses).then(function() {
+          console.log(responses);
+          //send response to python here
+        });
+      }
+    })
   });
 
   async function getResponsesToBeAnalyzed() {
-    var surveyToBeAnalyzed = await db.collection('surveys').find({"_id": ObjectId('5b21757e547afc8b282381e1')}).toArray(); //add in req.body.identifier
-    return surveyToBeAnalyzed;
-  /*  if (req.body.oneVar == true) {
-    for (let i = 0; i < )
-    } else {
-      responsesToBeAnalyzed[0] = await
-    } */
 
-  }
-  async function asdf() {
+    surveyToBeAnalyzed = await db.collection('surveys').find({"_id": ObjectId(req.body.identifier)}).toArray(); //req.body.identifier
+    return surveyToBeAnalyzed;
+  };
+
+
+
+
+  async function firstLoopResponse(surveyArr) {
+
+    for(let j = 0; j < surveyArr.length; j++) {
+      responses['first'] = await responses['first'].concat(surveyArr[j].response[firstResponseId]);
+      //console.log('res1', responses);
+      if(j === surveyArr.length) {
+        return 0;
+      }
+    }
+
+}
+
+  async function secondLoopResponse(surveyArr) {
+
+    responses['second'] = [];
+    for(let i = 0; i < surveyArr.length; i++) {
+      responses['second'] = await responses['second'].concat(surveyArr[i].response[secondResponseId]);
+      console.log('res2', responses);
+    }
 
   }
 
