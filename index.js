@@ -49,14 +49,16 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
 
     db = client.db('thought-jar-test');
 
+
+
+    //workspace
+
+
+
+    //end worskpace
+
+
     });
-
-
-//workspace
-
-
-
-//end worskpace
 
 app.get('/', (req, res) => {
   res.send('Hello World');
@@ -98,6 +100,8 @@ app.post('/createSurvey', function (req, res) {
               "questionList": questionsList,
               "clientDbId": clientDbId,
               "responses": [],
+              "reqResponses": req.body['reqResponses'],
+              "responsesSoFar": 0
             };
 
             surveyCollection.insert(surveyData, function(err, result) {
@@ -286,34 +290,39 @@ app.post('/myJarAnalysis', function (req, res) {
   var responses = {};
   responses['first'] = [];
   var surveyToBeAnalyzed;
+  var questionList = [];
   getResponsesToBeAnalyzed().then(function(survey) {
+    questionList = survey[0].questionList;
+    console.log(questionList);
     firstLoopResponse(survey[0].responses).then(function() {
 
-      if(false === false) { //req.body.oneVar
+      if(req.body.oneVar === false) { // two variables to be analyzed
         secondLoopResponse(surveyToBeAnalyzed[0].responses).then(function() {
-          console.log(responses);
-          //send response to python here
-          if(req.body.oneVar){
-            if(req.body.firstQuestionType === "numberanswer"){
-              fetch("http://localhost:8081/oneVarNum", {
-                method: 'POST',
-                body: JSON.stringify(responses),
-                headers:{
-                  'Content-Type': 'application/json'
-                }
-              }).then(response => {
-                return response.text().then((text) => {
-                  console.log(text);
-                  var data = {
-                    'src': text
-                  };
-                  res.send(data);
-                })
-              }).catch(error => console.error('Error:', error))
-              .then(response => console.log('Success'));
-            }
-          }
         });
+      }else{ // there is only one variable to be analyzed
+        console.log(responses);
+        var questionData = Object.assign({}, responses);
+        //send response to python here
+        console.log("printing question list");
+        questionData["firstQuestionField"] = questionList[parseInt(req.body.firstResponseId.slice(8))]["questionField"];
+        if(req.body.firstQuestionType === "numberanswer"){
+          fetch("http://localhost:8081/oneVarNum", {
+            method: 'POST',
+            body: JSON.stringify(questionData),
+            headers:{
+              'Content-Type': 'application/json'
+            }
+          }).then(response => {
+            return response.text().then((text) => {
+              console.log(text);
+              var data = {
+                'src': text
+              };
+              res.send(data);
+            })
+          }).catch(error => console.error('Error:', error))
+          .then(response => console.log('Success'));
+        }
       }
     })
   });
@@ -465,8 +474,10 @@ app.post('/respond', function (req, res) {
           if (err) {
             res.send('error adding to database');
           } else {
-            console.log('SUCCESS adding response');
-            res.send('success');
+            db.collection('surveys').update({"_id" : ObjectId(req.body.surveyId)}, { $inc: {"responsesSoFar": 1} }, function (err, result) {
+              console.log('SUCCESS adding response');
+              res.send('success');
+            });
           }
         });
 
