@@ -234,6 +234,8 @@ app.post('/myJars', function (req, res) {
 app.post('/myJar', function (req, res) {
 
   var fullData;
+  var reqResponses;
+  var responsesSoFar;
   getResponsesById().then(function(surveyData) {
     removeIdentifiers(surveyData).then(function(finalData) {
       getAnalysis(finalData);
@@ -243,6 +245,8 @@ app.post('/myJar', function (req, res) {
     async function getResponsesById() {
       let surveyData = await db.collection('surveys').find({"_id" : ObjectId(req.body.identifier)}).toArray();
       fullData = surveyData;
+      reqResponses = surveyData[0].reqResponses;
+      responsesSoFar = surveyData[0].responsesSoFar;
       return await surveyData[0].responses;
     };
 
@@ -270,12 +274,16 @@ app.post('/myJar', function (req, res) {
       }).then(response => {
         return response.text().then((text) => {
           console.log('Printing FUll Data');
-          console.log(fullData);
-          console.log(text);
+          console.log(reqResponses);
+          console.log(typeof reqResponses);
+          console.log(responsesSoFar);
+          console.log(typeof responsesSoFar);
           var data = {
             'title': fullData[0]['title'],
             'questionList': fullData[0]['questionList'],
-            'responseCSV': text,
+            'responsesSoFar': responsesSoFar,
+            'reqResponses': parseInt(reqResponses),
+            'responseCSV': text
           };
           res.send(data);
         })
@@ -304,7 +312,9 @@ app.post('/myJarAnalysis', function (req, res) {
         var questionData = Object.assign({}, responses);
         //send response to python here
         console.log("printing question list");
-        questionData["firstQuestionField"] = questionList[parseInt(req.body.firstResponseId.slice(8))]["questionField"];
+        console.log(parseInt(req.body.firstResponseId.slice(8)));
+        console.log(questionList[parseInt(req.body.firstResponseId.slice(8))]);
+        questionData["firstQuestionField"] = questionList[parseInt(req.body.firstResponseId.slice(8))-1]["questionField"];
         if(req.body.firstQuestionType === "numberanswer"){
           fetch("http://localhost:8081/oneVarNum", {
             method: 'POST',
