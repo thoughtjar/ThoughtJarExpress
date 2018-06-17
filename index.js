@@ -308,6 +308,7 @@ app.post('/myJarAnalysis', function (req, res) {
         secondLoopResponse(surveyToBeAnalyzed[0].responses).then(function() {
         });
       }else{ // there is only one variable to be analyzed
+
         console.log(responses);
         var questionData = Object.assign({}, responses);
         //send response to python here
@@ -315,24 +316,38 @@ app.post('/myJarAnalysis', function (req, res) {
         console.log(parseInt(req.body.firstResponseId.slice(8)));
         console.log(questionList[parseInt(req.body.firstResponseId.slice(8))]);
         questionData["firstQuestionField"] = questionList[parseInt(req.body.firstResponseId.slice(8))-1]["questionField"];
-        if(req.body.firstQuestionType === "numberanswer"){
-          fetch("http://localhost:8081/oneVarNum", {
-            method: 'POST',
-            body: JSON.stringify(questionData),
-            headers:{
-              'Content-Type': 'application/json'
-            }
-          }).then(response => {
-            return response.text().then((text) => {
-              console.log(text);
-              var data = {
-                'src': text
-              };
-              res.send(data);
-            })
-          }).catch(error => console.error('Error:', error))
-          .then(response => console.log('Success'));
-        }
+        var url;
+        if(req.body.firstQuestionType === "numberanswer") {
+          url = "http://localhost:8081/oneVarNum";
+        } else if(req.body.firstQuestionType === "multiplechoice") {
+          url = "http://localhost:8081/oneVarMC";
+        };
+        console.log(url);
+        fetch(url, {
+          method: 'POST',
+          body: JSON.stringify(questionData),
+          headers:{
+            'Content-Type': 'application/json'
+          }
+        }).then(response => {
+          /*
+          return response.text().then((text) => {
+            console.log(text);
+            var data = {
+              'src': text
+            };
+            res.send(data);
+          });
+          */
+          return response.json().then((json) => {
+            console.log(json);
+            var data = {
+              'src': json["srcList"]
+            };
+            res.send(data);
+          });
+        }).catch(error => console.error('Error:', error))
+        .then(response => console.log('Success'));
       }
     })
   });
