@@ -321,6 +321,8 @@ app.post('/myJarAnalysis', function (req, res) {
           url = "http://localhost:8081/oneVarNum";
         } else if(req.body.firstQuestionType === "multiplechoice") {
           url = "http://localhost:8081/oneVarMC";
+        } else if(req.body.firstQuestionType === "longanswer") {
+          url = "http://localhost:8081/oneVarLongText";
         };
         console.log(url);
         fetch(url, {
@@ -330,15 +332,6 @@ app.post('/myJarAnalysis', function (req, res) {
             'Content-Type': 'application/json'
           }
         }).then(response => {
-          /*
-          return response.text().then((text) => {
-            console.log(text);
-            var data = {
-              'src': text
-            };
-            res.send(data);
-          });
-          */
           return response.json().then((json) => {
             console.log(json);
             var data = {
