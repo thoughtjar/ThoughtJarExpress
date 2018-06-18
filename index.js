@@ -306,15 +306,22 @@ app.post('/myJarAnalysis', function (req, res) {
 
       if(req.body.oneVar === false) { // two variables to be analyzed
         secondLoopResponse(surveyToBeAnalyzed[0].responses).then(function() {
+          console.log(responses);
+          var questionData = Object.assign({}, responses);
+          //send two var response to python
+          questionData["firstQuestionField"] = questionList[parseInt(req.body.firstResponseId.slice(8))-1]["questionField"];
+          questionData["secondQuestionField"] = questionList[parseInt(req.body.secondResponseId.slice(8))-1]["questionField"];
+          var url;
+          if(req.body.firstQuestionType === "numberanswer" && req.body.secondQuestionType === "numberanswer"){
+            url = "http://localhost:8081/twoVarNumNum";
+            console.log(url);
+          };
         });
       }else{ // there is only one variable to be analyzed
 
         console.log(responses);
         var questionData = Object.assign({}, responses);
         //send response to python here
-        console.log("printing question list");
-        console.log(parseInt(req.body.firstResponseId.slice(8)));
-        console.log(questionList[parseInt(req.body.firstResponseId.slice(8))]);
         questionData["firstQuestionField"] = questionList[parseInt(req.body.firstResponseId.slice(8))-1]["questionField"];
         var url;
         if(req.body.firstQuestionType === "numberanswer") {
