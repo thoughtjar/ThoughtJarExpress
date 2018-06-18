@@ -273,11 +273,6 @@ app.post('/myJar', function (req, res) {
         }
       }).then(response => {
         return response.text().then((text) => {
-          console.log('Printing FUll Data');
-          console.log(reqResponses);
-          console.log(typeof reqResponses);
-          console.log(responsesSoFar);
-          console.log(typeof responsesSoFar);
           var data = {
             'title': fullData[0]['title'],
             'questionList': fullData[0]['questionList'],
@@ -294,7 +289,7 @@ app.post('/myJar', function (req, res) {
 });
 
 app.post('/myJarAnalysis', function (req, res) {
-
+  console.log(req.body);
   var responses = {};
   responses['first'] = [];
   var surveyToBeAnalyzed;
@@ -314,8 +309,23 @@ app.post('/myJarAnalysis', function (req, res) {
           var url;
           if(req.body.firstQuestionType === "numberanswer" && req.body.secondQuestionType === "numberanswer"){
             url = "http://localhost:8081/twoVarNumNum";
-            console.log(url);
           };
+          fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(questionData),
+            headers:{
+              'Content-Type': 'application/json'
+            }
+          }).then(response => {
+            return response.json().then((json) => {
+              console.log(json);
+              var data = {
+                'src': json["srcList"]
+              };
+              res.send(data);
+            });
+          }).catch(error => console.error('Error:', error))
+          .then(response => console.log('Success'));
         });
       }else{ // there is only one variable to be analyzed
 
