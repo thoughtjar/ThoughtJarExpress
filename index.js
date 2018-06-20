@@ -6,6 +6,7 @@ const os = require('os');
 const express = require('express');
 const bodyParser = require('body-parser');
 const rp = require('request-promise');
+const cors = require('cors');
 
 const mongodb = require('mongodb');
 const MONGO_URL = 'mongodb://kaushik:kaushik123@ds235609.mlab.com:35609/thought-jar-test';
@@ -24,6 +25,7 @@ var http = require('http');
 
 const app = express();
 
+
 var db;
 var clientID;
 var users;
@@ -32,13 +34,8 @@ app.use(bodyParser.json());
 
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }));
-
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
-
+app.use(bodyParser.text());
+app.use(cors())
 
 
 mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
@@ -190,7 +187,7 @@ app.post('/myJars', function (req, res) {
       }
       console.log(decoded);
       users.find({ "_id" : ObjectId(decoded['dbId'])}, { 'surveysOwned' : 1 }).toArray(function (err, result) {
-        if(result[0]['surveysOwned'].length === 0) {
+	 if(result[0]['surveysOwned'] === undefined) {
           var blankData = {
             "jars": []
           }
@@ -524,7 +521,7 @@ app.post('/respond', function (req, res) {
 
 app.post('/authenticate', function (req, res) {
 
-  console.log(req.body);
+  console.log("AUTH REQUESTTTTTTTTTTTTT: " + req.body);
 
   const ticket = client.verifyIdToken({
       idToken: req.body.id_token,
