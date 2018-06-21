@@ -520,12 +520,38 @@ app.post('/respond', function (req, res) {
 
 
 app.post('/authenticate', function (req, res) {
+  console.log(JSON.stringify(req.body));
+  var changerToken;
+  var tempToken;
+  var gooAudience;
 
+  setConsts().then(useToken());
+
+ async function setConsts() {
+  if(req.body.isMobile == 1) {
+	changerToken = req.body.id_token;
+	gooAudience =  '665725879844-hh7vs0udvd5c1akujda4ehr2gbplg6ki.apps.googleusercontent.com';
+	return 0;
+  } else {
+	changerToken = req.body.id_token;
+	gooAudience = '665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.apps.googleusercontent.com';
+	return 0;
+  }
+}
+  async function stripToken(fullToken) {
+	tempToken = await fullToken.substring(4);
+	tempToken = await fullToken.substring(0, fullToken.length-1);
+	console.log(tempToken)
+	return tempToken
+  }
   console.log("AUTH REQUESTTTTTTTTTTTTT: " + req.body);
+  console.log(typeof req.body.id_token)
 
+  function useToken() { 
+  console.log(gooAudience)
   const ticket = client.verifyIdToken({
       idToken: req.body.id_token,
-      audience: '665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.apps.googleusercontent.com',
+      audience: gooAudience
 
     /*const payload = ticket.getPayload();
     const userEmail = payload['email'];
@@ -554,6 +580,7 @@ app.post('/authenticate', function (req, res) {
           fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
               jwt.sign(existingUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedExistingUserDataResponse) {
                 res.send({"access-token": encryptedExistingUserDataResponse, "name": result[0]['fullName'], "email": result[0]['email']});
+		return 0;
               });
           });
 
@@ -569,6 +596,7 @@ app.post('/authenticate', function (req, res) {
             fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
                 jwt.sign(newUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedNewUserDataResponse) {
                   res.send({"access-token": encryptedNewUserDataResponse, "name": result['ops'][0]['fullName'], "email": result['ops'][0]['email']});
+		  return 0;
                 });
             });
           });
@@ -579,7 +607,7 @@ app.post('/authenticate', function (req, res) {
     });
 
   });
-
+ };
 });
 
 app.post('/logout', function (req, res) {
