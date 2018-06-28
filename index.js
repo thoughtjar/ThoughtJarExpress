@@ -521,6 +521,8 @@ app.post('/respond', function (req, res) {
 });
 
 
+app.post('/')
+
 app.post('/authenticate', function (req, res) {
   console.log(JSON.stringify(req.body));
   var changerToken;
@@ -582,7 +584,7 @@ app.post('/authenticate', function (req, res) {
           fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
               jwt.sign(existingUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedExistingUserDataResponse) {
                 res.send({"access-token": encryptedExistingUserDataResponse, "name": result[0]['fullName'], "email": result[0]['email']});
-		return 0;
+		              return 0;
               });
           });
 
@@ -598,7 +600,7 @@ app.post('/authenticate', function (req, res) {
             fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
                 jwt.sign(newUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedNewUserDataResponse) {
                   res.send({"access-token": encryptedNewUserDataResponse, "name": result['ops'][0]['fullName'], "email": result['ops'][0]['email']});
-		  return 0;
+		                return 0;
                 });
             });
           });
@@ -613,9 +615,11 @@ app.post('/authenticate', function (req, res) {
 });
 
 
-app.post('signUp', function(req, res) {
+app.post('/signUp', function(req, res) {
 
-  hashPass(req.body.password).then(insertUserIntoDb(hash))
+  hashPass(req.body.password).then(function(hash) {
+    insertUserIntoDb(hash);
+  })
 
   async function hashPass(plainTextPass) {
     var salt = await bcrypt.genSalt(saltRounds);
@@ -627,10 +631,11 @@ app.post('signUp', function(req, res) {
     db.collection('users').insertOne({
       "phone": req.body.phone,
       "hashedP": securePass,
-      "fullName": req.body.fullName,
+      "fName": req.body.fName,
+      "lName": req.body.lName,
       "access-token": 'cotton'
     }).then(function(result) {
-      console.log(result);
+      console.log(result); //result of inserting into DB
       var newUserDataResponse ={"name": result['ops'][0]['fullName'], "phone": result['ops'][0]['phone'], "access-token": result['ops'][0]['access-token'], "dbId": result['ops'][0]['_id']};
       fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
           jwt.sign(newUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedNewUserDataResponse) {
@@ -644,8 +649,7 @@ app.post('signUp', function(req, res) {
 
 });
 
-app.post('login', function(req, res) {
-  var pnumber = '4084638418'
+app.post('/login', function(req, res) {
   users = db.collection('users');
   users.find({phone: req.body.phone}).toArray(function(err, result) {
     if(result.length > 0) {
@@ -660,7 +664,6 @@ app.post('login', function(req, res) {
                 return 0; //all clear, everything works
             });
         });
-
       } else {
         //user exists but password does not match
         res.send('incorrect password');
