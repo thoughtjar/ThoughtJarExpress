@@ -636,7 +636,7 @@ app.post('/signUp', function(req, res) {
 
   async function hashPass(plainTextPass) {
     bcrypt.genSalt(saltRounds, function(err, salt) {
-      bcrypt.hash(myPlaintextPassword, salt, function(err, hash) {
+      bcrypt.hash(plainTextPass, salt, function(err, hash) {
           return hash;
       });
   });
@@ -670,7 +670,7 @@ app.post('/login', function(req, res) {
   users.find({phone: req.body.phone}).toArray(function(err, result) {
     if(result.length > 0) {
       //user exists
-      console.log("db res: " + result);
+      console.log("db res: " + JSON.stringify(result));
       if(comparePass(req.body.password, result[0].hashedP)) {
         //password matches, login
         var existingUserDataResponse ={"name": result[0]['fullName'], "phone": result[0]['phone'], "access-token": result[0]['access-token'], "dbId": result[0]['_id']};
