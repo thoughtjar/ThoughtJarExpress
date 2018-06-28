@@ -616,30 +616,31 @@ app.post('/authenticate', function (req, res) {
 
 
 app.post('/signUp', function(req, res) {
+  var users = db.collection('users');
+
   checkIfUserExists().then(function(existence) {
+    console.log(existence)
     if(existence === false) {
       //new user
-      hashPass(req.body.password).then(function(hash) {
-        insertUserIntoDb(hash);
-      });
+      hashPass(req.body.password).then(function(generatedHashedPass){
+        insertUserIntoDb(generatedHashedPass);
+      })
     } else {
       //user exists, should login instead
       res.send('user already exists');
     }
-   })
+   });
   
 
   async function checkIfUserExists() {
-    var doesExist = await db.collection('users').find({"phone": req.body.phone}).toArray();
+    var doesExist = await users.find({"phone": req.body.phone}).toArray();
     return doesExist.length > 0; 
   }
 
   async function hashPass(plainTextPass) {
-    bcrypt.genSalt(saltRounds, function(err, salt) {
-      bcrypt.hash(plainTextPass, salt, function(err, hash) {
-          return hash;
-      });
-  });
+    var theSalt = await bcrypt.genSalt(saltRounds);
+    var theHash = await bcrypt.hash(plainTextPass, theSalt); 
+    return theHash;
   }
 
   function insertUserIntoDb(securePass) {
