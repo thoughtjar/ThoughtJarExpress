@@ -616,10 +616,23 @@ app.post('/authenticate', function (req, res) {
 
 
 app.post('/signUp', function(req, res) {
+  checkIfUserExists().then(function(existence) {
+    if(existence === false) {
+      //new user
+      hashPass(req.body.password).then(function(hash) {
+        insertUserIntoDb(hash);
+      });
+    } else {
+      //user exists, should login instead
+      res.send('user already exists');
+    }
+   })
+  
 
-  hashPass(req.body.password).then(function(hash) {
-    insertUserIntoDb(hash);
-  })
+  async function checkIfUserExists() {
+    var doesExist = await db.collection('users').find({"phone": req.body.phone}).toArray();
+    return doesExist.length > 0; 
+  }
 
   async function hashPass(plainTextPass) {
     var salt = await bcrypt.genSalt(saltRounds);
@@ -654,6 +667,7 @@ app.post('/login', function(req, res) {
   users.find({phone: req.body.phone}).toArray(function(err, result) {
     if(result.length > 0) {
       //user exists
+      console.log("db res: " + result);
       if(comparePass(req.body.password, result[0].hashedP)) {
         //password matches, login
         var existingUserDataResponse ={"name": result[0]['fullName'], "phone": result[0]['phone'], "access-token": result[0]['access-token'], "dbId": result[0]['_id']};
@@ -666,6 +680,7 @@ app.post('/login', function(req, res) {
         });
       } else {
         //user exists but password does not match
+        console.log("incorrect password");
         res.send('incorrect password');
       }
     } else {
