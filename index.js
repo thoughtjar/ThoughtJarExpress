@@ -20,6 +20,8 @@ const client = new OAuth2Client('665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.a
 const Promise = require('promise');
 
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 var http = require('http');
 
@@ -49,7 +51,7 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
 
 
     //workspace
-
+   
 
 
     //end worskpace
@@ -608,6 +610,78 @@ app.post('/authenticate', function (req, res) {
 
   });
  };
+});
+
+
+app.post('signUp', function(req, res) {
+
+  hashPass(req.body.password).then(insertUserIntoDb(hash))
+
+  async function hashPass(plainTextPass) {
+    var salt = await bcrypt.genSalt(saltRounds);
+    var hash = await bcrypt.hash(plainTextPass, salt);
+    return hash;
+  }
+
+  function insertUserIntoDb(securePass) {
+    db.collection('users').insertOne({
+      "phone": req.body.phone,
+      "hashedP": securePass,
+      "fullName": req.body.fullName,
+      "access-token": 'cotton'
+    }).then(function(result) {
+      console.log(result);
+      var newUserDataResponse ={"name": result['ops'][0]['fullName'], "phone": result['ops'][0]['phone'], "access-token": result['ops'][0]['access-token'], "dbId": result['ops'][0]['_id']};
+      fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
+          jwt.sign(newUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedNewUserDataResponse) {
+            res.send({"access-token": encryptedNewUserDataResponse, "name": result['ops'][0]['fullName'], "phone": result['ops'][0]['phone']});
+            return 0;
+          });
+       });
+    });
+  }
+  
+
+});
+
+app.post('login', function(req, res) {
+  var pnumber = '4084638418'
+  users = db.collection('users');
+  users.find({phone: req.body.phone}).toArray(function(err, result) {
+    if(result.length > 0) {
+      //user exists
+      if(comparePass(req.body.password, result[0].hashedP)) {
+        //password matches, login
+        var existingUserDataResponse ={"name": result[0]['fullName'], "phone": result[0]['phone'], "access-token": result[0]['access-token'], "dbId": result[0]['_id']};
+
+        fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
+            jwt.sign(existingUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedExistingUserDataResponse) {
+              res.send({"access-token": encryptedExistingUserDataResponse, "name": result[0]['fullName'], "email": result[0]['email']});
+                return 0; //all clear, everything works
+            });
+        });
+
+      } else {
+        //user exists but password does not match
+        res.send('incorrect password');
+      }
+    } else {
+      //user does not exist
+      res.send('User does not exist');
+    }
+  });
+
+  async function comparePass(plainTextPass, hashedPass) {
+    var passwordsDoMatch = await bcrypt.compare(plainTextPass, hashedPass); 
+    if(passwordsDoMatch) {
+      //login
+      return true;
+    } else {
+      //not correct password, but user exists
+      return false;
+    }
+  }
+
 });
 
 app.post('/logout', function (req, res) {
