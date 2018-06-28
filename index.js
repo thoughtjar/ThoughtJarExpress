@@ -635,9 +635,11 @@ app.post('/signUp', function(req, res) {
   }
 
   async function hashPass(plainTextPass) {
-    var salt = await bcrypt.genSalt(saltRounds);
-    var hash = await bcrypt.hash(plainTextPass, salt);
-    return hash;
+    bcrypt.genSalt(saltRounds, function(err, salt) {
+      bcrypt.hash(myPlaintextPassword, salt, function(err, hash) {
+          return hash;
+      });
+  });
   }
 
   function insertUserIntoDb(securePass) {
@@ -663,6 +665,7 @@ app.post('/signUp', function(req, res) {
 });
 
 app.post('/login', function(req, res) {
+  console.log(req.body.phone);
   users = db.collection('users');
   users.find({phone: req.body.phone}).toArray(function(err, result) {
     if(result.length > 0) {
@@ -685,6 +688,7 @@ app.post('/login', function(req, res) {
       }
     } else {
       //user does not exist
+      console.log("user does not exist")
       res.send('User does not exist');
     }
   });
