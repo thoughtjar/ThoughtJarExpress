@@ -707,7 +707,9 @@ app.post('/login', function(req, res) {
         var existingUserDataResponse ={"phone": result[0]['phone'], "access-token": result[0]['access-token'], "dbId": result[0]['_id']};
 
         fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
+          console.log("read file");
             jwt.sign(existingUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedExistingUserDataResponse) {
+              console.log("signed token");
               var sendingBack = {"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result['ops'][0]['lName']};
               console.log(sendingBack);
               res.send({"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result['ops'][0]['lName']});
