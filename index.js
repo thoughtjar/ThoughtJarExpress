@@ -617,24 +617,24 @@ app.post('/authenticate', function (req, res) {
 app.post('/profile', function(req, res) {
   var users = db.collection('users');
 
-  getUserId().then(function(userId) {
-    getData(userId);
-  });
+  getUserId(); //automatically calls and returns getData()
 
-  async function getUserId() {
+ function getUserId() {
     fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function(err, cert) {
       jwt.verify(req.body['access-token'], cert, function(err, decoded) {
-        return decoded['dbId'];
+        getData(decoded['dbId']); //calls get data functon below
       });
     });
   }
 
-  async function getData(userId) {
-    var userDBData = await users.find({"_id": ObjectId('5b296d9f2e62cb6f59ab682b')}).toArray();
+  async function getData(userPhone) {
+    var userDBData = await users.find({"_id": ObjectId(userPhone)}).toArray();
     console.log(userDBData);
-  }
-});
+    var refinedUserData = {"balance": userDBData[0]['balance'], "jarsFilled": userDBData[0]['jarsFilled'].length};
+    res.send(refinedUserData);
+  };
 
+});
 app.post('/checkUserExists', function(req, res) {
   var users = db.collection('users');
   mainCheck().then(function(existence) {
