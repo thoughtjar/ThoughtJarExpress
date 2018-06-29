@@ -611,6 +611,27 @@ app.post('/authenticate', function (req, res) {
  };
 });
 
+app.post('/profile', function(req, res) {
+  var users = db.collection('users');
+
+  getUserId().then(function(userId) {
+    getData(userDBData);
+  });
+
+  async function getUserId() {
+    fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function(err, cert) {
+      jwt.verify(req.body['access-token'], cert, function(err, decoded) {
+        return decoded['dbId'];
+      });
+    });
+  }
+
+  async function getData(userId) {
+    var userDBData = await users.find({"_id": userId}).toArray();
+    console.log(userDBData);
+  }
+});
+
 app.post('/checkUserExists', function(req, res) {
   mainCheck().then(function(existence) {
     res.send(existence);
