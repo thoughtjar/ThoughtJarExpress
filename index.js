@@ -722,9 +722,9 @@ app.post('/login', function(req, res) {
               }
               console.log("encrypted user response: " + encryptedExistingUserDataResponse);
               console.log("fName: " + result[0]['fName']);
-              var sendingBack = {"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result['ops'][0]['lName']};
+              var sendingBack = {"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result[0]['lName']};
               console.log(JSON.stringify(sendingBack));
-              res.send({"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result['ops'][0]['lName']});
+              res.send({"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result[0]['lName']});
               //all clear, everything works
             });
         });
