@@ -520,9 +520,6 @@ app.post('/respond', function (req, res) {
 
 });
 
-
-app.post('/')
-
 app.post('/authenticate', function (req, res) {
   console.log(JSON.stringify(req.body));
   var changerToken;
@@ -614,12 +611,21 @@ app.post('/authenticate', function (req, res) {
  };
 });
 
+app.post('/checkUserExists', function(req, res) {
+  mainCheck().then(function(existence) {
+    res.send(existence);
+  });
+  async function mainCheck() {
+    var doesExist = await users.find({"phone": req.body.phone}).toArray();
+    return doesExist.length > 0; 
+  }
+});
 
 app.post('/signUp', function(req, res) {
   var users = db.collection('users');
 
   checkIfUserExists().then(function(existence) {
-    console.log(existence)
+    //even though user exists check happens before, we check again for database safety
     if(existence === false) {
       //new user
       hashPass(req.body.password).then(function(generatedHashedPass){
