@@ -633,6 +633,7 @@ app.post('/profile', function(req, res) {
 });
 
 app.post('/checkUserExists', function(req, res) {
+  var users = db.collection('users');
   mainCheck().then(function(existence) {
     res.send(existence);
   });
