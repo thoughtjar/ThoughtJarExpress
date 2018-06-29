@@ -396,8 +396,8 @@ app.post('/myJarAnalysis', function (req, res) {
 
 
 app.post('/fillJars', function (req, res) {
-
   console.log("/fillJars BEING CALLED");
+  console.log("access-token: " + req.body['access-token']);
   surveys = db.collection('surveys');
   fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', (err, cert) => {
     if (err) {
