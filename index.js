@@ -511,14 +511,16 @@ app.post('/respond', function (req, res) {
           } else {
             db.collection('surveys').update({"_id" : ObjectId(req.body.surveyId)}, { $inc: {"responsesSoFar": 1} }, function (err, result) {
               console.log('SUCCESS adding response');
-              res.send('success');
+              db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, { $push: { "jarsFilled" : req.body.surveyId } }, function(err, result) {
+                console.log('SUCCESS adding survey to user profile');
+                res.send('success');
+              });
             });
           }
         });
 
       });
     });
-
 });
 
 app.post('/authenticate', function (req, res) {
@@ -681,6 +683,8 @@ app.post('/signUp', function(req, res) {
       "hashedP": securePass,
       "fName": req.body.fName,
       "lName": req.body.lName,
+      "jarsFilled": [],
+      "balance": 0,
       "access-token": 'cotton'
     }).then(function(result) {
       console.log("insert result: " + result); //result of inserting into DB
