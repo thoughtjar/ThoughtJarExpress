@@ -15,8 +15,6 @@ const ObjectId = require('mongodb').ObjectId;
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client('665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.apps.googleusercontent.com');
 
-//const async = require('async');
-//const await = require('asyncawait/await');
 const Promise = require('promise');
 
 const jwt = require('jsonwebtoken');
@@ -72,7 +70,7 @@ app.post('/createSurvey', function (req, res) {
         console.log('token printing');
         console.log(decoded);
         console.log(decoded.dbId);
-        clientDbId = decoded.dbId; // bar
+        clientDbId = decoded.dbId; 
 
 
 
@@ -523,6 +521,57 @@ app.post('/respond', function (req, res) {
     });
 });
 
+app.post('/withdraw', function(req, res) {
+  const withdrawMinimum = 0; //set minimum widthdraw amount. Tx will fail if not met.
+  var users = db.collection('users');
+  var txExecutorId;
+  var txIsSafe;
+  widthdraw();
+
+  function getExecId(){
+    fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function(err, cert) {
+      jwt.verify(req.body['access-token'], cert, function(err, decoded) {
+        txExecutorId = decoded['dbId']; 
+      });
+    });
+  }
+
+  async function checkBalanceSafe() {
+    var currentData = await users.find({"_id" : txExecutorId}).toArray();
+    var currentBalance = currentData[0]['balance'];
+    if(currentBalance >= withdrawMinimum && currentBalance >= req.body.widthdrawAmount) {
+      return txIsSafe = true; //safe to make tx
+    } else {
+      return txIsSafe = false; //not safe to make tx
+    }
+  }
+
+  async function changeBalance() {
+    var setNewBalance = await users.update({"_id" : ObjectId(txExecutorId)}, { $inc: {"balance": req.body.widthdrawAmount} }).toArray();
+    var newStats = await users.find({"_id" : ObjectId(txExecutorId)}).toArray();
+    newBalance = newStats[0]['balance'];
+    //assert balance is correct
+  }
+
+  function widthdraw() {
+    getExecId().then(function(){
+      checkBalanceSafe().then(function() {
+        if(txIsSafe === true) {
+          //tx is safe, continue on
+          changeBalance().then(function() {
+            //if balance correctly updated, make request to payment provider
+          });
+        } else {
+          return res.send("balance not sufficient");
+        }
+      });
+    });
+  }
+
+});
+
+
+
 app.post('/authenticate', function (req, res) {
   console.log(JSON.stringify(req.body));
   var changerToken;
@@ -614,6 +663,7 @@ app.post('/authenticate', function (req, res) {
  };
 });
 
+
 app.post('/profile', function(req, res) {
   var users = db.collection('users');
 
@@ -631,7 +681,7 @@ app.post('/profile', function(req, res) {
     var userDBData = await users.find({"_id": ObjectId(userPhone)}).toArray();
     console.log(userDBData);
     var refinedUserData = {"balance": userDBData[0]['balance'], "jarsFilled": userDBData[0]['jarsFilled'].length};
-    res.send(refinedUserData);
+    return res.send(refinedUserData);
   };
 
 });
