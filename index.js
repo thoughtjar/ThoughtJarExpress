@@ -703,6 +703,7 @@ app.post('/login', function(req, res) {
       console.log("db res: " + JSON.stringify(result));
       if(comparePass(req.body.password, result[0].hashedP)) {
         console.log("pass matches");
+        console.log("result: " + result);
         //password matches, login
         var existingUserDataResponse ={"phone": result[0]['phone'], "access-token": result[0]['access-token'], "dbId": result[0]['_id']};
 
@@ -719,6 +720,8 @@ app.post('/login', function(req, res) {
               } else {
                 console.log("signed token");
               }
+              console.log("encrypted user response: " + encryptedExistingUserDataResponse);
+              console.log("fName: " + result[0]['fName']);
               var sendingBack = {"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result['ops'][0]['lName']};
               console.log(JSON.stringify(sendingBack));
               res.send({"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result['ops'][0]['lName']});
