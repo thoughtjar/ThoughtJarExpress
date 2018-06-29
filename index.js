@@ -615,7 +615,7 @@ app.post('/profile', function(req, res) {
   var users = db.collection('users');
 
   getUserId().then(function(userId) {
-    getData(userDBData);
+    getData(userId);
   });
 
   async function getUserId() {
@@ -627,7 +627,7 @@ app.post('/profile', function(req, res) {
   }
 
   async function getData(userId) {
-    var userDBData = await users.find({"_id": userId}).toArray();
+    var userDBData = await users.find({"_id": ObjectId('5b296d9f2e62cb6f59ab682b')}).toArray();
     console.log(userDBData);
   }
 });
@@ -652,7 +652,7 @@ app.post('/signUp', function(req, res) {
       //new user
       hashPass(req.body.password).then(function(generatedHashedPass){
         insertUserIntoDb(generatedHashedPass);
-      })
+      });
     } else {
       //user exists, should login instead
       res.send('user already exists');
@@ -683,7 +683,7 @@ app.post('/signUp', function(req, res) {
       var newUserDataResponse ={"name": result['ops'][0]['fullName'], "phone": result['ops'][0]['phone'], "access-token": result['ops'][0]['access-token'], "dbId": result['ops'][0]['_id']};
       fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
           jwt.sign(newUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedNewUserDataResponse) {
-            res.send({"access-token": encryptedNewUserDataResponse, "name": result['ops'][0]['fullName'], "phone": result['ops'][0]['phone']});
+            res.send({"access-token": encryptedNewUserDataResponse, "fName": result['ops'][0]['fName'], "lName": result['ops'][0]['lName'], "phone": result['ops'][0]['phone']});
             return 0;
           });
        });
@@ -706,7 +706,7 @@ app.post('/login', function(req, res) {
 
         fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
             jwt.sign(existingUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedExistingUserDataResponse) {
-              res.send({"access-token": encryptedExistingUserDataResponse, "name": result[0]['fullName'], "email": result[0]['email']});
+              res.send({"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result['ops'][0]['lName'], "email": result[0]['email']});
                 return 0; //all clear, everything works
             });
         });
