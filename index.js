@@ -702,12 +702,15 @@ app.post('/login', function(req, res) {
       //user exists
       console.log("db res: " + JSON.stringify(result));
       if(comparePass(req.body.password, result[0].hashedP)) {
+        console.log("pass matches");
         //password matches, login
-        var existingUserDataResponse ={"name": result[0]['fullName'], "phone": result[0]['phone'], "access-token": result[0]['access-token'], "dbId": result[0]['_id']};
+        var existingUserDataResponse ={"phone": result[0]['phone'], "access-token": result[0]['access-token'], "dbId": result[0]['_id']};
 
         fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
             jwt.sign(existingUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedExistingUserDataResponse) {
-              res.send({"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result['ops'][0]['lName'], "email": result[0]['email']});
+              var sendingBack = {"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result['ops'][0]['lName']};
+              console.log(sendingBack);
+              res.send({"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result['ops'][0]['lName']});
                 return 0; //all clear, everything works
             });
         });
