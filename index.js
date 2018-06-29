@@ -177,6 +177,7 @@ app.post('/createSurvey', function (req, res) {
 
 
 app.post('/myJars', function (req, res) {
+  console.log(req.body['access-token']);
   console.log("/myJars BEING CALLED");
   users = db.collection('users');
   fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', (err, cert) => {
