@@ -651,7 +651,9 @@ app.post('/signUp', function(req, res) {
     //even though user exists check happens before, we check again for database safety
     if(existence === false) {
       //new user
+      console.log("new user detected");
       hashPass(req.body.password).then(function(generatedHashedPass){
+        console.log("insertingUSerintoDb");
         insertUserIntoDb(generatedHashedPass);
       });
     } else {
@@ -673,6 +675,7 @@ app.post('/signUp', function(req, res) {
   }
 
   function insertUserIntoDb(securePass) {
+    console.log("inside insert function");
     db.collection('users').insertOne({
       "phone": req.body.phone,
       "hashedP": securePass,
@@ -680,8 +683,8 @@ app.post('/signUp', function(req, res) {
       "lName": req.body.lName,
       "access-token": 'cotton'
     }).then(function(result) {
-      console.log(result); //result of inserting into DB
-      var newUserDataResponse ={"name": result['ops'][0]['fullName'], "phone": result['ops'][0]['phone'], "access-token": result['ops'][0]['access-token'], "dbId": result['ops'][0]['_id']};
+      console.log("insert result: " + result); //result of inserting into DB
+      var newUserDataResponse ={"fName": result['ops'][0]['fName'], "lName": result['ops'][0]['lName'], "phone": result['ops'][0]['phone'], "access-token": result['ops'][0]['access-token'], "dbId": result['ops'][0]['_id']};
       fs.readFile('pk-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
           jwt.sign(newUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedNewUserDataResponse) {
             res.send({"access-token": encryptedNewUserDataResponse, "fName": result['ops'][0]['fName'], "lName": result['ops'][0]['lName'], "phone": result['ops'][0]['phone']});
