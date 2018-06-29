@@ -711,7 +711,7 @@ app.post('/login', function(req, res) {
               var sendingBack = {"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result['ops'][0]['lName']};
               console.log(sendingBack);
               res.send({"access-token": encryptedExistingUserDataResponse, "fName": result[0]['fName'], "lName": result['ops'][0]['lName']});
-                return 0; //all clear, everything works
+              //all clear, everything works
             });
         });
       } else {
