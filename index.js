@@ -16,6 +16,7 @@ const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client('665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.apps.googleusercontent.com');
 
 const Promise = require('promise');
+const util = require('util');
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -508,15 +509,15 @@ app.post('/respond', function (req, res) {
             if (err) {
               res.send('error adding to database');
             } else {
-              db.collection('surveys').update({"_id" : ObjectId(req.body.surveyId)}, { $inc: {"responsesSoFar": 1} }, function (err, result) {
-                console.log('SUCCESS adding response');
-                db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, { $push: { "jarsFilled" : ObjectId(req.body.surveyId) } }, function(err, result) {
-                  console.log('SUCCESS adding survey to user profile');
-                  db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, {$inc: {"balance" : NumberDecimal(surveyReward.toString())}}, function(err, result){
-                    res.send('success');	
-                  });
+            db.collection('surveys').update({"_id" : ObjectId(req.body.surveyId)}, { $inc: {"responsesSoFar": 1} }, function (err, result) {
+              console.log('SUCCESS adding response');
+              db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, { $push: { "jarsFilled" : ObjectId(req.body.surveyId) } }, function(err, result) {
+                console.log('SUCCESS adding survey to user profile');
+                db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, {$inc: {"balance" : NumberDecimal(surveyReward.toString())}}, function(err, result){
+                  res.send('success');	
                 });
               });
+            });
             }
           });
 
@@ -530,18 +531,30 @@ app.post('/withdraw', function(req, res) {
   var users = db.collection('users');
   var txExecutorId;
   var txIsSafe;
+  var signedWidthdrawAmtMongo = "-" + (req.body.withdrawAmount).toString(); 
   widthdraw();
 
-  function getExecId(){
-    fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function(err, cert) {
-      jwt.verify(req.body['access-token'], cert, function(err, decoded) {
-        txExecutorId = decoded['dbId']; 
+  async function getExecId(){
+    var cert = await new Promise((resolve, reject) => {
+      fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function(err, result) {
+        resolve(result)
       });
     });
+
+    return txExecutorId = await new Promise((resolve, reject) => {
+  
+      jwt.verify(req.body['access-token'], cert, function(err, decoded) {
+        resolve(decoded['dbId']);
+      });
+  
+    });
+
+      
   }
 
   async function checkBalanceSafe() {
-    var currentData = await users.find({"_id" : txExecutorId}).toArray();
+    var currentData = await users.find({"_id" : ObjectId(txExecutorId)}).toArray();
+    console.log("cData: " + JSON.stringify(currentData));
     var currentBalance = currentData[0]['balance'];
     if(currentBalance >= withdrawMinimum && currentBalance >= req.body.widthdrawAmount) {
       return txIsSafe = true; //safe to make tx
@@ -551,26 +564,30 @@ app.post('/withdraw', function(req, res) {
   }
 
   async function changeBalance() {
-    var setNewBalance = await users.update({"_id" : ObjectId(txExecutorId)}, { $inc: {"balance": req.body.widthdrawAmount} }).toArray();
-    var newStats = await users.find({"_id" : ObjectId(txExecutorId)}).toArray();
-    newBalance = newStats[0]['balance'];
-    //assert balance is correct
+    return await users.update({"_id" : ObjectId(txExecutorId)}, { $inc: {"balance": NumberDecimal(signedWidthdrawAmtMongo) } });
+    //assert balance is correct for safer operations
+  }
+
+  async function transferFunds() {
+
   }
 
   function widthdraw() {
     getExecId().then(function(){
       checkBalanceSafe().then(function() {
+      //automatically called checkBalanceSafe()
         if(txIsSafe === true) {
           //tx is safe, continue on
           changeBalance().then(function() {
-            //if balance correctly updated, make request to payment provider
+            //making request to payment provider
+            res.send("success widthdraw")
           });
         } else {
           return res.send("balance not sufficient");
         }
-      });
     });
-  }
+  });
+}
 
 });
 
