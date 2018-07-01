@@ -509,9 +509,11 @@ app.post('/respond', function (req, res) {
           } else {
             db.collection('surveys').update({"_id" : ObjectId(req.body.surveyId)}, { $inc: {"responsesSoFar": 1} }, function (err, result) {
               console.log('SUCCESS adding response');
-              db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, { $push: { "jarsFilled" : req.body.surveyId } }, function(err, result) {
+              db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, { $push: { "jarsFilled" : ObjectId(req.body.surveyId) } }, function(err, result) {
                 console.log('SUCCESS adding survey to user profile');
-                res.send('success');
+	        db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, {$inc: {"balance" : 2}}, function(err, result){
+                res.send('success');	
+		})
               });
             });
           }
@@ -666,13 +668,17 @@ app.post('/authenticate', function (req, res) {
 
 app.post('/profile', function(req, res) {
   var users = db.collection('users');
-
+  console.log("acc token: " + req.body['access-token']);
   getUserId(); //automatically calls and returns getData()
 
  function getUserId() {
     fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function(err, cert) {
       jwt.verify(req.body['access-token'], cert, function(err, decoded) {
-        getData(decoded['dbId']); //calls get data functon below
+	if(err) {
+	  console.log("err: " + err);
+	}
+        console.log("deooded profile body: " + decoded);
+	getData(decoded['dbId']); //calls get data functon below
       });
     });
   }
@@ -734,7 +740,7 @@ app.post('/signUp', function(req, res) {
       "fName": req.body.fName,
       "lName": req.body.lName,
       "jarsFilled": [],
-      "balance": 0,
+      "balance": 0.00,
       "access-token": 'cotton'
     }).then(function(result) {
       console.log("insert result: " + result); //result of inserting into DB
