@@ -11,7 +11,7 @@ const cors = require('cors');
 const mongodb = require('mongodb');
 const MONGO_URL = 'mongodb://kaushik:kaushik123@ds235609.mlab.com:35609/thought-jar-test';
 const ObjectId = require('mongodb').ObjectId;
-
+const NumberDecimal = require('mongodb').NumberDecimal;
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client('665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.apps.googleusercontent.com');
 
@@ -487,6 +487,7 @@ app.post('/fillJar', function(req, res) {
 
 
 app.post('/respond', function (req, res) {
+  var surveyReward = 2; //req.body.reward;
 
   fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function (err, cert) {
 
@@ -503,24 +504,25 @@ app.post('/respond', function (req, res) {
           var responseData = {"responderId": decoded['dbId'], "response": req.body.response};
           console.log("respinse data", responseData);
 
-        db.collection('surveys').update({ "_id" : ObjectId(req.body.surveyId) }, { $push: { "responses": responseData } }, function (err, result) {
-          if (err) {
-            res.send('error adding to database');
-          } else {
-            db.collection('surveys').update({"_id" : ObjectId(req.body.surveyId)}, { $inc: {"responsesSoFar": 1} }, function (err, result) {
-              console.log('SUCCESS adding response');
-              db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, { $push: { "jarsFilled" : ObjectId(req.body.surveyId) } }, function(err, result) {
-                console.log('SUCCESS adding survey to user profile');
-	        db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, {$inc: {"balance" : 2}}, function(err, result){
-                res.send('success');	
-		})
+          db.collection('surveys').update({ "_id" : ObjectId(req.body.surveyId) }, { $push: { "responses": responseData } }, function (err, result) {
+            if (err) {
+              res.send('error adding to database');
+            } else {
+              db.collection('surveys').update({"_id" : ObjectId(req.body.surveyId)}, { $inc: {"responsesSoFar": 1} }, function (err, result) {
+                console.log('SUCCESS adding response');
+                db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, { $push: { "jarsFilled" : ObjectId(req.body.surveyId) } }, function(err, result) {
+                  console.log('SUCCESS adding survey to user profile');
+                  db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, {$inc: {"balance" : NumberDecimal(surveyReward.toString())}}, function(err, result){
+                    res.send('success');	
+                  });
+                });
               });
-            });
-          }
-        });
+            }
+          });
 
       });
     });
+
 });
 
 app.post('/withdraw', function(req, res) {
