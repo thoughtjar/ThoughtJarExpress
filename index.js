@@ -711,6 +711,64 @@ app.post('/profile', function(req, res) {
   };
 
 });
+
+app.post('/inviteSMS', function(req, res) {
+
+  getInviterInfo().then(function(inviterName) {
+    sendSMS(inviterName);
+  })
+
+  async function getInviterInfo(){
+    var cert = await new Promise((resolve, reject) => {
+      fs.readFile('cert-GHPIKGOGGF4UYRN4772YQVSF7CRVCTES.pem', function(err, result) {
+        resolve(result);
+      });
+    });
+
+    return txExecutorId = await new Promise((resolve, reject) => {
+      jwt.verify(req.body['access-token'], cert, function(err, decoded) {
+        resolve(decoded['fName'] + " " + decoded['lName']);
+      });
+    });
+  }
+
+  function sendSMS(inviterName) {
+    return new Promise((resolve, reject) => {
+
+      var options = {
+        method: 'POST',
+        uri: 'https://api.twilio.com/2010-04-01/Accounts/ACb0257e359e484faa3a415caadba55130/Messages.json',
+        body: {
+          "To": "+1" + req.body.phone,
+          "From": "+18312288506",
+          "Body": "fghjkhghj",
+          "ACb0257e359e484faa3a415caadba55130":"27d49f3b0705227476350ed86a9bb94a"
+        },
+        json: true // Automatically parses the JSON string in the response
+    }
+   console.log("inviter name: " + inviterName);
+  rp(options)
+      .then(function (verifyOutcome) {
+          if(verifyOutcome.success) {
+            console.log(verifyOutcome);
+            resolve();
+          } else {
+            console.log("Code failed to be verified (by Twilio API) - " + verifyOutcome);
+            res.send("Failed to verify");
+            reject();
+          }
+      })
+      .catch(function (err) {
+          console.log("Execution error: Code failed to be verified - " + err);
+          res.send("Failed to verify");
+          reject();
+      });
+    });
+  }
+  
+});
+
+
 app.post('/checkUserExists', function(req, res) {
   var users = db.collection('users');
   mainCheck().then(function(existence) {
