@@ -724,22 +724,51 @@ app.post('/checkUserExists', function(req, res) {
 
 app.post('/signUp', function(req, res) {
   var users = db.collection('users');
-
-  checkIfUserExists().then(function(existence) {
-    //even though user exists check happens before, we check again for database safety
-    if(existence === false) {
-      //new user
-      console.log("new user detected");
-      hashPass(req.body.password).then(function(generatedHashedPass){
-        console.log("insertingUSerintoDb");
-        insertUserIntoDb(generatedHashedPass);
+  finishVerifySMS().then(function() {
+    checkIfUserExists().then(function(existence) {
+      //even though user exists check happens before, we check again for database safety
+      if(existence === false) {
+        //new user
+        console.log("new user detected");
+        hashPass(req.body.password).then(function(generatedHashedPass){
+          console.log("insertingUserintoDb");
+          insertUserIntoDb(generatedHashedPass);
+        });
+      } else {
+        //user exists, should login instead
+        res.send('user already exists');
+      }
+    });
+  }).catch(() => console.log("caught rejected promise from finishVerifySMS()"));
+    
+ function finishVerifySMS() {
+    return new Promise((resolve, reject) => {
+    var options = {
+      uri: 'https://api.authy.com/protected/json/phones/verification/check' + "?country_code=" + "1" + "&" + "phone_number=" + req.body.phone + "&" + "verification_code" + req.body.verificationCode,
+      headers: {
+          'X-Authy-API-Key': 's0jJzc3q2AL4VNapA9QufN1dKwh6PvrS'
+      },
+      json: true // Automatically parses the JSON string in the response
+  };
+   
+  rp(options)
+      .then(function (verifyOutcome) {
+          if(verifyOutcome.success) {
+            console.log("phone number verified");
+            resolve();
+          } else {
+            console.log("Code failed to be verified (by Twilio API)");
+            res.send("Failed to verify");
+            reject();
+          }
+      })
+      .catch(function (err) {
+          console.log("Execution error: Code failed to be verified");
+          res.send("Failed to verify");
+          reject();
       });
-    } else {
-      //user exists, should login instead
-      res.send('user already exists');
-    }
-   });
-  
+    });
+  }
 
   async function checkIfUserExists() {
     var doesExist = await users.find({"phone": req.body.phone}).toArray();
@@ -756,6 +785,7 @@ app.post('/signUp', function(req, res) {
     console.log("inside insert function");
     db.collection('users').insertOne({
       "phone": req.body.phone,
+      "verifiedP": true,
       "hashedP": securePass,
       "fName": req.body.fName,
       "lName": req.body.lName,
@@ -774,7 +804,35 @@ app.post('/signUp', function(req, res) {
     });
   }
   
+});
 
+
+app.post('/verifySMS', function(req, res) {
+  var options = {
+    method: 'POST',
+    uri: 'https://api.authy.com/protected/json/phones/verification/start',
+    headers: {
+        'X-Authy-API-Key': 's0jJzc3q2AL4VNapA9QufN1dKwh6PvrS'
+    },
+    body: {
+      "via": "sms",
+      "phone_number": req.body.phone,
+      "country_code": "1",
+      "code_length": "4",
+      "locale": "en"
+    },
+    json: true // Automatically parses the JSON string in the response
+};
+ 
+rp(options)
+    .then(function (repos) {
+        console.log("Code sent to " + req.body.phone);
+        res.send("Code sent");
+    })
+    .catch(function (err) {
+        console.log("Code failed to be sent to " + req.body.phone);
+        res.send("Code failed to be sent");
+    });
 });
 
 app.post('/login', function(req, res) {
