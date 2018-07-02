@@ -11,7 +11,7 @@ const cors = require('cors');
 const mongodb = require('mongodb');
 const MONGO_URL = 'mongodb://kaushik:kaushik123@ds235609.mlab.com:35609/thought-jar-test';
 const ObjectId = require('mongodb').ObjectId;
-const NumberDecimal = require('mongodb').NumberDecimal;
+//const NumberDecimal = require('mongodb').NumberDecimal; broken 
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client('665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.apps.googleusercontent.com');
 
@@ -513,7 +513,7 @@ app.post('/respond', function (req, res) {
               console.log('SUCCESS adding response');
               db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, { $push: { "jarsFilled" : ObjectId(req.body.surveyId) } }, function(err, result) {
                 console.log('SUCCESS adding survey to user profile');
-                db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, {$inc: {"balance" : NumberDecimal(surveyReward.toString())}}, function(err, result){
+                db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, {$inc: {"balance" : mongodb.Decimal128.fromString(surveyReward.toString())}}, function(err, result){
                   res.send('success');	
                 });
               });
@@ -569,7 +569,7 @@ app.post('/withdraw', function(req, res) {
   }
 
   async function transferFunds() {
-
+    
   }
 
   function widthdraw() {
