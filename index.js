@@ -704,7 +704,7 @@ app.post('/profile', function(req, res) {
 
   async function getData(userPhone) {
     var userDBData = await users.find({"_id": ObjectId(userPhone)}).toArray();
-    var refinedUserData = {"balance": (parseFloat((userDBData[0]['balance'].toString())).toFixed(2), "jarsFilled": userDBData[0]['jarsFilled'].length};
+    var refinedUserData = {"balance": (parseFloat(userDBData[0]['balance'].toString())).toFixed(2), "jarsFilled": userDBData[0]['jarsFilled'].length};
     return res.send(refinedUserData);
   };
 
