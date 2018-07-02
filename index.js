@@ -744,7 +744,12 @@ app.post('/signUp', function(req, res) {
  function finishVerifySMS() {
     return new Promise((resolve, reject) => {
     var options = {
-      uri: 'https://api.authy.com/protected/json/phones/verification/check' + "?country_code=" + "1" + "&" + "phone_number=" + req.body.phone + "&" + "verification_code" + req.body.verificationCode,
+      uri: 'https://api.authy.com/protected/json/phones/verification/check' + '?country_code=' + '1' + '&' + 'phone_number=' + req.body.phone + '&' + 'verification_code' + req.body.verificationCode,
+      qs: {
+        'country_code': '1',
+        'phone_number': req.body.phone,
+        'verification_code': req.body.verification_code
+      },
       headers: {
           'X-Authy-API-Key': 's0jJzc3q2AL4VNapA9QufN1dKwh6PvrS'
       },
@@ -757,13 +762,13 @@ app.post('/signUp', function(req, res) {
             console.log("phone number verified");
             resolve();
           } else {
-            console.log("Code failed to be verified (by Twilio API)");
+            console.log("Code failed to be verified (by Twilio API) - " + verifyOutcome);
             res.send("Failed to verify");
             reject();
           }
       })
       .catch(function (err) {
-          console.log("Execution error: Code failed to be verified");
+          console.log("Execution error: Code failed to be verified - " + err);
           res.send("Failed to verify");
           reject();
       });
