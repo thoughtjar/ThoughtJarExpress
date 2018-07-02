@@ -705,6 +705,7 @@ app.post('/profile', function(req, res) {
   async function getData(userPhone) {
     var userDBData = await users.find({"_id": ObjectId(userPhone)}).toArray();
     console.log(userDBData);
+    console.log("bal: " + userDBData[0]['balance']);
     var refinedUserData = {"balance": userDBData[0]['balance'].toString(), "jarsFilled": userDBData[0]['jarsFilled'].length};
     return res.send(refinedUserData);
   };
