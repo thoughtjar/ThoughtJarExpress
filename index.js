@@ -509,6 +509,8 @@ app.post('/respond', function (req, res) {
             if (err) {
               res.send('error adding to database');
             } else {
+              console.log("result of adding survey to db: " + result.toArray());
+            } 
             db.collection('surveys').update({"_id" : ObjectId(req.body.surveyId)}, { $inc: {"responsesSoFar": 1} }, function (err, result) {
               console.log('SUCCESS adding response');
               db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, { $push: { "jarsFilled" : ObjectId(req.body.surveyId) } }, function(err, result) {
@@ -518,7 +520,6 @@ app.post('/respond', function (req, res) {
                 });
               });
             });
-            }
           });
 
       });
@@ -704,6 +705,7 @@ app.post('/profile', function(req, res) {
 
   async function getData(userPhone) {
     var userDBData = await users.find({"_id": ObjectId(userPhone)}).toArray();
+    console.log("sent bal: " + (parseFloat(userDBData[0]['balance'].toString())).toFixed(2));
     var refinedUserData = {"balance": (parseFloat(userDBData[0]['balance'].toString())).toFixed(2), "jarsFilled": userDBData[0]['jarsFilled'].length};
     return res.send(refinedUserData);
   };
