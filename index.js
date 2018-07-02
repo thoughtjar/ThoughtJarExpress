@@ -744,11 +744,11 @@ app.post('/signUp', function(req, res) {
  function finishVerifySMS() {
     return new Promise((resolve, reject) => {
     var options = {
-      uri: 'https://api.authy.com/protected/json/phones/verification/check' + '?country_code=' + '1' + '&' + 'phone_number=' + req.body.phone + '&' + 'verification_code' + req.body.verificationCode,
+      uri: 'https://api.authy.com/protected/json/phones/verification/check',
       qs: {
         'country_code': '1',
         'phone_number': req.body.phone,
-        'verification_code': req.body.verification_code
+        'verification_code': req.body.verificationCode
       },
       headers: {
           'X-Authy-API-Key': 's0jJzc3q2AL4VNapA9QufN1dKwh6PvrS'
