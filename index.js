@@ -713,10 +713,11 @@ app.post('/profile', function(req, res) {
 });
 
 app.post('/inviteSMS', function(req, res) {
+  var txExecutorId;
 
-  getInviterInfo().then(function(inviterName) {
-    sendSMS(inviterName);
-  })
+  getInviterInfo().then(function(inviterData) {
+    sendSMS(inviterData[0]['fName'] + " " + inviterData[0]['lName']);
+  });
 
   async function getInviterInfo(){
     var cert = await new Promise((resolve, reject) => {
@@ -725,42 +726,50 @@ app.post('/inviteSMS', function(req, res) {
       });
     });
 
-    return txExecutorId = await new Promise((resolve, reject) => {
+    txExecutorId = await new Promise((resolve, reject) => {
       jwt.verify(req.body['access-token'], cert, function(err, decoded) {
-        resolve(decoded['fName'] + " " + decoded['lName']);
+        console.log(decoded);
+        resolve(decoded['dbId']);
       });
     });
+
+    
+    return await db.collection('users').find({"_id" : ObjectId(txExecutorId)}).toArray();
+    
   }
 
   function sendSMS(inviterName) {
     return new Promise((resolve, reject) => {
-
       var options = {
         method: 'POST',
         uri: 'https://api.twilio.com/2010-04-01/Accounts/ACb0257e359e484faa3a415caadba55130/Messages.json',
-        body: {
-          "To": "+1" + req.body.phone,
-          "From": "+18312288506",
-          "Body": "fghjkhghj",
-          "ACb0257e359e484faa3a415caadba55130":"27d49f3b0705227476350ed86a9bb94a"
+        headers: {
+          'Authorization': 'Basic QUNiMDI1N2UzNTllNDg0ZmFhM2E0MTVjYWFkYmE1NTEzMDoyN2Q0OWYzYjA3MDUyMjc0NzYzNTBlZDg2YTliYjk0YQ==',
+          'content-type': 'application/x-www-form-urlencoded'
+        },
+        formData: {
+          To: "+1" + req.body.phone,
+          From: "+18312288506",
+          Body: inviterName + " invited you to thoughtjar"
         },
         json: true // Automatically parses the JSON string in the response
     }
    console.log("inviter name: " + inviterName);
+
   rp(options)
       .then(function (verifyOutcome) {
-          if(verifyOutcome.success) {
-            console.log(verifyOutcome);
+          if(verifyOutcome['error_code'] == null) {
+            console.log("success sending invite");
             resolve();
           } else {
-            console.log("Code failed to be verified (by Twilio API) - " + verifyOutcome);
-            res.send("Failed to verify");
+            console.log("Invite failed to be verified (by Twilio API) - " + verifyOutcome);
+            res.send("Invite Failed");
             reject();
           }
       })
       .catch(function (err) {
-          console.log("Execution error: Code failed to be verified - " + err);
-          res.send("Failed to verify");
+          console.log("Execution error: Invite failed to be sent - " + err);
+          res.send("Invite Failed");
           reject();
       });
     });
