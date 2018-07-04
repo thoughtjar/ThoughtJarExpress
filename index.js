@@ -11,7 +11,7 @@ const cors = require('cors');
 const mongodb = require('mongodb');
 const MONGO_URL = 'mongodb://kaushik:kaushik123@ds235609.mlab.com:35609/thought-jar-test';
 const ObjectId = require('mongodb').ObjectId;
-//const NumberDecimal = require('mongodb').NumberDecimal; broken 
+//const NumberDecimal = require('mongodb').NumberDecimal; broken
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client('665725879844-0prbhschdv3mdh2ignucocl9cq3em3dm.apps.googleusercontent.com');
 
@@ -50,7 +50,7 @@ mongodb.MongoClient.connect(MONGO_URL, function(err, client) {
 
 
     //workspace
-   
+
 
 
     //end worskpace
@@ -71,7 +71,7 @@ app.post('/createSurvey', function (req, res) {
         console.log('token printing');
         console.log(decoded);
         console.log(decoded.dbId);
-        clientDbId = decoded.dbId; 
+        clientDbId = decoded.dbId;
 
 
 
@@ -509,14 +509,14 @@ app.post('/respond', function (req, res) {
             if (err) {
               res.send('error adding to database');
             } else {
-              console.log("result of adding survey to db: " + result.toArray());
-            } 
+              //console.log("result of adding survey to db: " + result.toArray());
+            }
             db.collection('surveys').update({"_id" : ObjectId(req.body.surveyId)}, { $inc: {"responsesSoFar": 1} }, function (err, result) {
               console.log('SUCCESS adding response');
               db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, { $push: { "jarsFilled" : ObjectId(req.body.surveyId) } }, function(err, result) {
                 console.log('SUCCESS adding survey to user profile');
                 db.collection('users').update({"_id" : ObjectId(decoded["dbId"])}, {$inc: {"balance" : mongodb.Decimal128.fromString(surveyReward.toString())}}, function(err, result){
-                  res.send('success');	
+                  res.send('success');
                 });
               });
             });
@@ -532,7 +532,7 @@ app.post('/withdraw', function(req, res) {
   var users = db.collection('users');
   var txExecutorId;
   var txIsSafe;
-  var signedWidthdrawAmtMongo = "-" + (req.body.withdrawAmount).toString(); 
+  var signedWidthdrawAmtMongo = "-" + (req.body.withdrawAmount).toString();
   widthdraw();
 
   async function getExecId(){
@@ -543,14 +543,14 @@ app.post('/withdraw', function(req, res) {
     });
 
     return txExecutorId = await new Promise((resolve, reject) => {
-  
+
       jwt.verify(req.body['access-token'], cert, function(err, decoded) {
         resolve(decoded['dbId']);
       });
-  
+
     });
 
-      
+
   }
 
   async function checkBalanceSafe() {
@@ -570,7 +570,7 @@ app.post('/withdraw', function(req, res) {
   }
 
   async function transferFunds() {
-    
+
   }
 
   function widthdraw() {
@@ -622,7 +622,7 @@ app.post('/authenticate', function (req, res) {
   console.log("AUTH REQUESTTTTTTTTTTTTT: " + req.body);
   console.log(typeof req.body.id_token)
 
-  function useToken() { 
+  function useToken() {
   console.log(gooAudience)
   const ticket = client.verifyIdToken({
       idToken: req.body.id_token,
@@ -733,9 +733,9 @@ app.post('/inviteSMS', function(req, res) {
       });
     });
 
-    
+
     return await db.collection('users').find({"_id" : ObjectId(txExecutorId)}).toArray();
-    
+
   }
 
   function sendSMS(inviterName) {
@@ -774,7 +774,7 @@ app.post('/inviteSMS', function(req, res) {
       });
     });
   }
-  
+
 });
 
 
@@ -785,7 +785,7 @@ app.post('/checkUserExists', function(req, res) {
   });
   async function mainCheck() {
     var doesExist = await users.find({"phone": req.body.phone}).toArray();
-    return doesExist.length > 0; 
+    return doesExist.length > 0;
   }
 });
 
@@ -807,7 +807,7 @@ app.post('/signUp', function(req, res) {
       }
     });
   }).catch(() => console.log("caught rejected promise from finishVerifySMS()"));
-    
+
  function finishVerifySMS() {
     return new Promise((resolve, reject) => {
     var options = {
@@ -822,7 +822,7 @@ app.post('/signUp', function(req, res) {
       },
       json: true // Automatically parses the JSON string in the response
   };
-   
+
   rp(options)
       .then(function (verifyOutcome) {
           if(verifyOutcome.success) {
@@ -844,12 +844,12 @@ app.post('/signUp', function(req, res) {
 
   async function checkIfUserExists() {
     var doesExist = await users.find({"phone": req.body.phone}).toArray();
-    return doesExist.length > 0; 
+    return doesExist.length > 0;
   }
 
   async function hashPass(plainTextPass) {
     var theSalt = await bcrypt.genSalt(saltRounds);
-    var theHash = await bcrypt.hash(plainTextPass, theSalt); 
+    var theHash = await bcrypt.hash(plainTextPass, theSalt);
     return theHash;
   }
 
@@ -875,7 +875,7 @@ app.post('/signUp', function(req, res) {
        });
     });
   }
-  
+
 });
 
 
@@ -895,7 +895,7 @@ app.post('/verifySMS', function(req, res) {
     },
     json: true // Automatically parses the JSON string in the response
 };
- 
+
 rp(options)
     .then(function (repos) {
         console.log("Code sent to " + req.body.phone);
@@ -926,7 +926,7 @@ app.post('/login', function(req, res) {
           } else {
             console.log("read file");
           }
-          
+
             jwt.sign(existingUserDataResponse, cert, { algorithm: 'RS256' }, function(err, encryptedExistingUserDataResponse) {
               if(err) {
                 console.log("error signing token");
@@ -954,7 +954,7 @@ app.post('/login', function(req, res) {
   });
 
   async function comparePass(plainTextPass, hashedPass) {
-    var passwordsDoMatch = await bcrypt.compare(plainTextPass, hashedPass); 
+    var passwordsDoMatch = await bcrypt.compare(plainTextPass, hashedPass);
     if(passwordsDoMatch) {
       //login
       return true;
